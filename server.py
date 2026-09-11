@@ -185,8 +185,8 @@ def fetch_data(a: AuthRequest):
             for z in p:
                 y.append(("classIds", z))
             aa = datetime.now()
-            y.append(("from", (aa - timedelta(days=30)).strftime("%Y-%m-%d 05:30:00")))
-            y.append(("to", (aa + timedelta(days=30)).strftime("%Y-%m-%d 05:30:00")))
+            y.append(("from", (aa - timedelta(days=45)).strftime("%Y-%m-%d 05:30:00")))
+            y.append(("to", (aa + timedelta(days=120)).strftime("%Y-%m-%d 05:30:00")))
             ab = requests.get(f"{c}/rest/classes/v2/lessons", headers=d, cookies=e, params=y, timeout=15)
             if ab.status_code == 200:
                 ac = ab.json()
@@ -277,12 +277,24 @@ def fetch_data(a: AuthRequest):
                 bo = bn.split(".")[0]
                 if bo > aw:
                     continue
-                bp = bm.get("finalStatus") or bm.get("status")
-                if not bp:
-                    if bm.get("present"):
+
+                raw_status = bm.get("finalStatus") or bm.get("status")
+                is_marked = bm.get("isMarked")
+                if is_marked is None:
+                    is_marked = bm.get("marked")
+
+                if is_marked is False or raw_status in ["NOT_MARKED", "UNMARKED", "PENDING", None]:
+                    if raw_status in ["PRESENT", "ABSENT", "OD"]:
+                        bp = raw_status
+                    elif bm.get("present") is True:
                         bp = "PRESENT"
+                    elif is_marked is False or raw_status is None:
+                        bp = "NOT_MARKED"
                     else:
                         bp = "ABSENT"
+                else:
+                    bp = raw_status
+
                 be.append({"comp": bi, "status": bp, "start": bo, "end": str(bm.get("lessonEndTime") or "").split(".")[0]})
                 
         be.sort(key=lambda x: x.get("start") or "", reverse=True)

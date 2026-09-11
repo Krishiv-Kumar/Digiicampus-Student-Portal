@@ -1,0 +1,20 @@
+{
+  "name": "Digiicampus Portal",
+  "short_name": "Digiicampus",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#030303",
+  "theme_color": "#030303",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/ios-filled/192/ffffff/graduation-cap.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/ios-filled/512/ffffff/graduation-cap.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

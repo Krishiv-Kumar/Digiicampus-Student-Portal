@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digiicampus Student Portal</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#030303" />
+  <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/192/ffffff/graduation-cap.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #030303; --card: rgba(255,255,255,0.02); --card-hover: rgba(255,255,255,0.04); --brd: rgba(255,255,255,0.04); --brd-hover: rgba(255,255,255,0.1); --accent: #ffffff; }
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; overflow-x: hidden; color: #e5e5e5; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 50%); }
+    .orb { position: absolute; width: 40vw; height: 40vw; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 20s infinite ease-in-out alternate; }
+    .orb-1 { top: -20%; left: -10%; background: rgba(120,120,120,0.1); }
+    .orb-2 { bottom: -20%; right: -10%; background: rgba(200,200,200,0.05); animation-delay: -10s; }
+    @keyframes float { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,50px) scale(1.1); } }
+    
+    .glass { background: var(--card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--brd); border-radius: 32px; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .glass:hover { background: var(--card-hover); border-color: var(--brd-hover); }
+    
+    .glass-login-box { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+
+    .btn-clean { background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: 100px; transition: all 0.2s ease; color: #a3a3a3; cursor: pointer; }
+    .btn-clean:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .click-pop { transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1); }
+    .click-pop:active { transform: scale(0.92); }
+    
+    .btn-anim-base { border: 1px solid transparent; border-radius: 100px; transition: all 0.3s cubic-bezier(0.16,1,0.3,1); cursor: pointer; font-weight: 500; outline: none; }
+    .btn-bunk { background: rgba(255,255,255,0.03); color: #858585; }
+    .btn-bunk:hover { background: rgba(244,63,94,0.1); color: #fb7185; border-color: rgba(244,63,94,0.2); box-shadow: 0 0 10px rgba(244,63,94,0.1); }
+    .btn-bunk:active { transform: scale(0.9); background: rgba(244,63,94,0.3); color: #fff; border-color: rgba(244,63,94,0.5); }
+    .btn-attend { background: rgba(255,255,255,0.03); color: #858585; }
+    .btn-attend:hover { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.2); box-shadow: 0 0 10px rgba(16,185,129,0.1); }
+    .btn-attend:active { transform: scale(0.9); background: rgba(16,185,129,0.3); color: #fff; border-color: rgba(16,185,129,0.5); }
+    .btn-active-bunk { background: rgba(244,63,94,0.15); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); box-shadow: 0 0 15px rgba(244,63,94,0.2); }
+    .btn-active-attend { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); box-shadow: 0 0 15px rgba(16,185,129,0.2); }
+
+    @keyframes subtleFlash { 0% { opacity: 0.3; transform: scale(0.96); filter: brightness(1.5); } 100% { opacity: 1; transform: scale(1); filter: brightness(1); } }
+    .update-flash { animation: subtleFlash 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; transform: translateY(10px); }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+    .progress-track { height: 1px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; position: relative; }
+    .progress-fill { height: 100%; background: var(--accent); transition: width 1.2s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+    .pulse-dot { animation: pulse 2s cubic-bezier(0.4,0,0.6,1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .circle-chart { transform: rotate(-90deg); }
+    .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(16px); }
+    .input-clean { background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: #fff; transition: all 0.3s; }
+    .input-clean:focus { outline: none; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.02); }
+    .txt-micro { font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="ambient"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+  <div class="relative z-10 max-w-[600px] mx-auto px-5 py-12 space-y-8">
+    <header class="flex items-end justify-between fade-in pb-3 border-b border-white/[0.04]" style="animation-delay:0s">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <h1 id="userHeading" class="text-3xl font-normal tracking-tight text-white">Hi, Student</h1>
+          <button type="button" onclick="openProfileModal()" id="profileBtn" class="hidden w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-neutral-300 transition click-pop text-xs" title="View Profile">ℹ</button>
+        </div>
+        <p class="text-xs font-medium text-neutral-400 tracking-wide" id="headerDateLine"></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="logout()" id="logoutBtn" class="hidden btn-clean px-4 py-2 txt-micro click-pop">Logout</button>
+      </div>
+    </header>
+    <div id="authSection" class="glass p-8 fade-in" style="animation-delay:0.1s">
+      <div class="mb-8">
+        <h2 class="text-2xl font-light text-white mb-2">Connect</h2>
+        <p class="text-xs text-neutral-500 font-mono">DIGIICAMPUS_AUTH_TOKEN</p>
+      </div>
+      <textarea id="tokenInput" rows="3" class="input-clean w-full p-5 text-xs font-mono mb-6 resize-none" placeholder="eyJhbG..."></textarea>
+      <div class="flex gap-3">
+        <button type="button" onclick="handleAuth()" id="loadBtn" class="flex-1 bg-white text-black font-medium py-4 rounded-[20px] text-sm hover:scale-[0.99] transition-transform click-pop">Log in</button>
+        <button type="button" onclick="loadDemoMode()" id="demoBtn" class="flex-1 bg-white/5 border border-white/10 text-white font-medium py-4 rounded-[20px] text-sm hover:bg-white/10 hover:scale-[0.99] transition-all click-pop">Try Demo</button>
+      </div>
+      <div id="demoIndicator" class="hidden mt-4 text-center">
+        <span class="text-[10px] uppercase tracking-widest font-mono text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">Demo Mode Active</span>
+      </div>
+      <div id="errorMsg" class="hidden mt-4 p-4 border border-red-500/20 rounded-[20px] bg-red-500/5">
+        <p class="text-red-400 text-xs font-mono"></p>
+      </div>
+    </div>
+    <div id="dashboard" class="hidden space-y-8">
+      <nav class="relative flex items-center gap-2 p-1.5 glass rounded-full fade-in" id="mainNav" style="animation-delay:0.1s">
+        <div id="navSlider" class="absolute top-1.5 bottom-1.5 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+        <button type="button" onclick="switchView('attendance')" id="navAttendanceBtn" class="relative z-10 flex-1 py-3 rounded-full text-xs transition-colors duration-300 font-medium text-black click-pop">Attendance</button>
+        <button type="button" onclick="switchView('timetable')" id="navTimetableBtn" class="relative z-10 flex-1 py-3 rounded-full text-xs transition-colors duration-300 text-neutral-400 hover:text-white click-pop">Schedule</button>
+        <button type="button" onclick="switchView('results')" id="navResultsBtn" class="relative z-10 flex-1 py-3 rounded-full text-xs transition-colors duration-300 text-neutral-400 hover:text-white click-pop">Results</button>
+      </nav>
+      <div id="liveStatusContainer" class="hidden glass p-6 fade-in border-white/20" style="animation-delay:0.2s">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-2 h-2 bg-white rounded-full pulse-dot"></div>
+            <div>
+              <div class="flex items-center gap-3 mb-1">
+                <span id="liveBadge" class="text-[10px] font-medium tracking-wider text-white px-2.5 py-0.5 rounded-full bg-white/10"></span>
+                <span id="liveCountdown" class="text-[10px] font-mono text-neutral-400"></span>
+              </div>
+              <h4 id="liveCourseName" class="font-medium text-base text-white"></h4>
+            </div>
+          </div>
+          <div class="text-right">
+            <span id="liveTimeBadge" class="text-xs font-mono text-neutral-300"></span>
+            <p id="liveCourseMeta" class="text-[10px] text-neutral-500 mt-1"></p>
+          </div>
+        </div>
+      </div>
+      <section id="viewAttendance" class="space-y-6">
+        <div class="glass p-8 fade-in flex items-center justify-between" style="animation-delay:0.2s">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="txt-micro text-neutral-500 block">Overall Standing</span>
+              <span id="overallDeltaBadge" class="hidden text-[9px] font-mono bg-white text-black px-2 py-0.5 rounded">SIMULATED</span>
+            </div>
+            <p id="overallCounts" class="text-xs font-mono text-neutral-400 mt-1">-- / --</p>
+            <div id="overallStatus" class="mt-4"></div>
+          </div>
+          <div class="relative w-36 h-36 flex items-center justify-center">
+            <svg class="absolute inset-0 w-full h-full circle-chart" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+              <circle id="circleProgress" cx="50" cy="50" r="46" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+            </svg>
+            <div class="relative z-10 flex items-baseline gap-1">
+                <h2 id="overallPct" class="text-4xl font-light text-white tracking-tighter">0.0</h2>
+                <span class="text-sm opacity-50">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="relative flex p-1.5 glass rounded-full fade-in w-full mb-2" id="attSubNav" style="animation-delay:0.25s">
+          <div id="attSubSlider" class="absolute top-1.5 bottom-1.5 rounded-full bg-white transition-all duration-300 z-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+          <button type="button" onclick="switchAttView('courses')" id="attTabCourses" class="relative z-10 flex-1 py-2 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop">Courses</button>
+          <button type="button" onclick="switchAttView('activity')" id="attTabActivity" class="relative z-10 flex-1 py-2 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Activity</button>
+        </div>
+        <div id="attContentCourses" class="space-y-6">
+            <div class="flex items-center gap-2 fade-in" style="animation-delay:0.3s">
+              <button type="button" onclick="toggleProjections()" id="masterProjBtn" class="btn-clean px-5 py-2.5 text-xs flex-1 click-pop">Toggle Projections</button>
+              <button type="button" onclick="resetAllProjections()" id="masterResetBtn" class="hidden btn-clean px-5 py-2.5 text-xs text-neutral-400 click-pop">Reset All</button>
+            </div>
+            <div id="courseList" class="space-y-3 fade-in" style="animation-delay:0.4s"></div>
+        </div>
+        <div id="attContentActivity" class="hidden space-y-4 fade-in">
+            <div id="globalLogsList" class="space-y-4"></div>
+        </div>
+      </section>
+      <section id="viewTimetable" class="hidden space-y-6">
+        <div class="flex items-center justify-between px-2 fade-in">
+          <h3 class="text-sm font-medium text-white">Routine</h3>
+          <div class="flex items-center gap-3">
+            <p id="ttCurrentClock" class="text-[10px] font-mono text-neutral-500"></p>
+            <button type="button" onclick="openCalendarModal()" class="btn-clean px-3 py-1.5 text-[10px] flex items-center gap-1.5 click-pop">
+              <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Calendar View
+            </button>
+          </div>
+        </div>
+        <div class="relative flex gap-2 overflow-x-auto custom-scrollbar fade-in p-1 glass rounded-full" id="ttDayTabsContainer">
+          <div id="ttSlider" class="absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+        </div>
+        <div id="ttSlotList" class="space-y-3 fade-in"></div>
+      </section>
+      <section id="viewResults" class="hidden space-y-6">
+        <div class="glass px-6 py-4 fade-in flex items-center justify-between" style="animation-delay:0.15s">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-white pulse-dot" id="resLiveDot"></div>
+            <span class="text-xs font-medium text-white tracking-wide uppercase">CGPA</span>
+          </div>
+          <span id="resultsCgpaVal" class="text-lg font-mono text-white tracking-wide flex items-center">--</span>
+        </div>
+        <div class="flex items-center gap-2 fade-in px-1" style="animation-delay:0.18s">
+            <button type="button" onclick="tglResProj()" id="resProjBtn" class="btn-clean px-5 py-2.5 text-xs flex-1 click-pop">Toggle Projections</button>
+            <button type="button" onclick="rstResProj()" id="resRstBtn" class="hidden btn-clean px-5 py-2.5 text-xs text-neutral-400 click-pop">Reset</button>
+        </div>
+        <div class="relative flex p-1.5 glass rounded-full fade-in w-full overflow-hidden" id="semTabsContainer" style="animation-delay:0.2s">
+          <div id="semSlider" class="absolute top-1.5 bottom-1.5 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+        </div>
+        <div class="glass p-8 fade-in flex items-center justify-between" style="animation-delay:0.3s">
+          <div>
+            <span class="txt-micro text-neutral-500 block mb-2">Academic Standing</span>
+            <h3 id="resultsSemTitle" class="text-2xl font-light text-white mb-1">Semester</h3>
+            <p class="text-xs font-mono text-neutral-400">Verified institutional SGPA results</p>
+          </div>
+          <div class="relative w-32 h-32 flex items-center justify-center flex-shrink-0">
+            <svg class="absolute inset-0 w-full h-full circle-chart" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+              <circle id="sgpaCircle" cx="50" cy="50" r="46" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1), stroke 0.5s ease"/>
+            </svg>
+            <div class="absolute inset-0 rounded-full border border-white/10 pulse-dot pointer-events-none scale-[1.15]"></div>
+            <div class="relative z-10 flex flex-col items-center justify-center mt-1">
+                <h2 id="resultsCurrentSgpaVal" class="text-3xl font-light text-white tracking-tighter font-mono leading-none">0.00</h2>
+                <span class="text-[9px] font-mono text-neutral-500 mt-1">/ 10.0</span>
+            </div>
+          </div>
+        </div>
+        <div id="semContentContainer" class="space-y-3 fade-in" style="animation-delay:0.4s"></div>
+      </section>
+    </div>
+  </div>
+  <div id="profileModal" class="fixed inset-0 modal-backdrop z-[80] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full max-w-[420px] rounded-[32px] border border-white/10 flex flex-col max-h-[85vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="profileModalInner">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+        <div>
+          <span class="txt-micro px-2.5 py-0.5 rounded-full bg-white/10 text-white mb-1.5 inline-block">Student Profile</span>
+          <h3 class="font-medium text-base text-white leading-snug">Personal Information</h3>
+        </div>
+        <button type="button" onclick="closeProfileModal()" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+          <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-4">
+        <div class="flex flex-col items-center justify-center pb-2 border-b border-white/5">
+          <img id="profilePicImg" src="" alt="" class="w-20 h-20 rounded-full object-cover border border-white/10 mb-3 hidden"/>
+          <h4 id="profileFullName" class="text-white font-medium text-base text-center">--</h4>
+          <p id="profileProgramme" class="text-xs text-neutral-400 font-mono text-center mt-1">--</p>
+        </div>
+        <div class="bg-white/5 rounded-2xl p-4 space-y-3">
+          <div class="flex flex-col"><span class="text-[10px] text-neutral-500 font-mono">Email</span><span id="profileEmail" class="text-xs font-mono text-white mt-0.5 truncate">--</span></div>
+          <div class="flex flex-col"><span class="text-[10px] text-neutral-500 font-mono">Phone</span><span id="profilePhone" class="text-xs font-mono text-white mt-0.5">--</span></div>
+          <div class="flex flex-col"><span class="text-[10px] text-neutral-500 font-mono">Batch Year</span><span id="profileBatch" class="text-xs font-mono text-white mt-0.5">--</span></div>
+          <div class="flex flex-col"><span class="text-[10px] text-neutral-500 font-mono">Quota</span><span id="profileQuota" class="text-xs font-mono text-white mt-0.5">--</span></div>
+          <div class="flex flex-col"><span class="text-[10px] text-neutral-500 font-mono">Admission Type</span><span id="profileAdmission" class="text-xs font-mono text-white mt-0.5">--</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="calendarModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full max-w-[850px] h-[680px] rounded-[40px] border border-white/5 flex flex-col overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="calendarModalInner">
+      <div class="p-6 pb-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div>
+            <h2 class="font-medium text-base text-white">Calendar Schedule</h2>
+          </div>
+        </div>
+        <div class="relative flex bg-white/5 p-1 rounded-full" id="calViewTabContainer">
+          <div id="calViewSlider" class="absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+          <button type="button" onclick="setCalView('month')" id="calViewMonthBtn" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop">Month</button>
+          <button type="button" onclick="setCalView('week')" id="calViewWeekBtn" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Week</button>
+          <button type="button" onclick="setCalView('day')" id="calViewDayBtn" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Day</button>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center bg-white/5 rounded-full p-1">
+            <button type="button" onclick="changeCalPeriod(-1)" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 text-neutral-400 text-xs click-pop">&larr;</button>
+            <span id="calPeriodLabel" class="px-3 text-xs font-mono text-white whitespace-nowrap"></span>
+            <button type="button" onclick="changeCalPeriod(1)" class="w-7 h-7 rounded-full flex items-center justify-center hover:bg-white/10 text-neutral-400 text-xs click-pop">&rarr;</button>
+          </div>
+          <button type="button" onclick="closeCalendarModal()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+            <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="calendarViewBody" class="flex-1 flex flex-col overflow-hidden bg-[#030303]/40"></div>
+    </div>
+  </div>
+  <div id="classDetailModal" class="fixed inset-0 modal-backdrop z-[70] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full max-w-[400px] rounded-[32px] border border-white/10 flex flex-col overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="classDetailInner">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <span id="classDetailType" class="txt-micro px-2.5 py-0.5 rounded-full bg-white/10 text-white mb-1.5 inline-block"></span>
+          <h3 id="classDetailName" class="font-medium text-base text-white leading-snug"></h3>
+        </div>
+        <button type="button" onclick="closeClassDetailModal()" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+          <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="bg-white/5 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Time</span>
+            <span id="classDetailTime" class="text-xs font-mono text-white font-medium"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Venue</span>
+            <span id="classDetailVenue" class="text-xs font-mono text-white font-medium"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Faculty</span>
+            <span id="classDetailFaculty" class="text-xs font-mono text-white font-medium text-right"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="resultDetailModal" class="fixed inset-0 modal-backdrop z-[70] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full max-w-[400px] rounded-[32px] border border-white/10 flex flex-col max-h-[85vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="resultDetailInner">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+        <div>
+          <span class="txt-micro px-2.5 py-0.5 rounded-full bg-white/10 text-white mb-1.5 inline-block">Course Details</span>
+          <h3 id="resDetName" class="font-medium text-base text-white leading-snug"></h3>
+        </div>
+        <button type="button" onclick="closeResultDetailModal()" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+          <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto custom-scrollbar">
+        <div class="bg-white/5 rounded-2xl p-4 space-y-3 mb-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Grade</span>
+            <span id="resDetGrade" class="text-xs font-mono text-white font-medium"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Grade Point</span>
+            <span id="resDetGP" class="text-xs font-mono text-white font-medium"></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-neutral-400 font-mono">Credits</span>
+            <span id="resDetCred" class="text-xs font-mono text-white font-medium text-right"></span>
+          </div>
+        </div>
+        <div id="resDetBreakdownLoader" class="flex items-center justify-center py-6 hidden">
+            <div class="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
+        </div>
+        <div id="resDetBreakdownContent" class="space-y-4"></div>
+      </div>
+    </div>
+  </div>
+  <div id="gradeSelectorModal" class="fixed inset-0 modal-backdrop z-[90] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300" onclick="if(event.target===this) closeGradeSelector()">
+    <div class="bg-[#0a0a0b] w-[340px] rounded-[32px] border border-white/10 flex flex-col overflow-hidden transform scale-95 translate-y-4 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) shadow-2xl shadow-black" id="gradeSelectorInner">
+      <div class="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+        <div>
+            <h3 class="font-medium text-sm text-white">Project Grade</h3>
+            <p class="text-[9px] font-mono text-neutral-500 mt-0.5">Select simulated performance</p>
+        </div>
+        <button type="button" onclick="closeGradeSelector()" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop text-neutral-400">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="gradeSelectorList" class="grid grid-cols-4 gap-2.5 p-5"></div>
+    </div>
+  </div>
+  <div id="dayDetailModal" class="fixed inset-0 modal-backdrop z-[60] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full max-w-[420px] rounded-[32px] border border-white/10 flex flex-col max-h-[80vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="dayDetailInner">
+      <div class="p-6 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <h3 id="dayDetailTitle" class="font-medium text-sm text-white"></h3>
+          <p class="text-[10px] text-neutral-500 font-mono mt-0.5">Scheduled Classes</p>
+        </div>
+        <button type="button" onclick="closeDayDetailModal()" class="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+          <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="dayDetailContent" class="p-5 overflow-y-auto space-y-2 flex-1 custom-scrollbar"></div>
+    </div>
+  </div>
+  <div id="subjectModal" class="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0a0a0b] w-full sm:max-w-[500px] sm:rounded-[40px] rounded-t-[40px] border border-white/5 flex flex-col max-h-[90vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="modalInner">
+      <div class="p-8 pb-6 border-b border-white/5 relative">
+        <button type="button" onclick="closeModal()" class="absolute top-6 right-6 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors click-pop">
+          <svg class="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <h2 id="subModalTitle" class="font-medium text-xl text-white leading-tight pr-8 mb-6"></h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <p id="subModalSub" class="text-sm text-neutral-400 font-mono mb-2.5">--/-- logs attached</p>
+                <span id="subModalTypeBadge" class="txt-micro px-3 py-1 rounded-full border border-neutral-600 text-neutral-300">--</span>
+            </div>
+            <div class="relative w-20 h-20 flex items-center justify-center flex-shrink-0">
+                <svg class="absolute inset-0 w-full h-full circle-chart" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+                    <circle id="subModalCircle" cx="40" cy="40" r="36" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2" style="transition:stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1)"/>
+                </svg>
+                <div class="relative z-10 flex items-baseline gap-0.5">
+                    <span id="subModalCircleText" class="text-base font-mono text-white font-medium">0.0</span><span class="text-[9px] font-mono text-neutral-400">%</span>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="relative flex p-2 border-b border-white/5 gap-2" id="modalNavContainer">
+        <div id="modalNavSlider" class="absolute top-2 bottom-2 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+        <button type="button" id="tabLogBtn" onclick="switchModalTab('history')" class="relative z-10 flex-1 py-3 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop">Logs</button>
+        <button type="button" id="tabSchedBtn" onclick="switchModalTab('upcoming')" class="relative z-10 flex-1 py-3 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Upcoming</button>
+      </div>
+      <div id="odSimulatorBar" class="p-6 border-b border-white/5 bg-white/[0.01]">
+        <div class="flex justify-between items-center">
+          <div>
+            <span class="txt-micro text-neutral-500 block mb-1">Simulated Standing</span>
+            <span id="odSimStats" class="text-lg font-light text-white font-mono">--/--</span>
+            <p id="odSimStatusText" class="text-xs text-neutral-400 mt-1"></p>
+          </div>
+          <button type="button" onclick="resetModalODs()" class="btn-clean px-4 py-2 text-[10px] click-pop">Reset ODs</button>
+        </div>
+      </div>
+      <div id="historyFilterBar" class="p-4 border-b border-white/5 flex justify-between items-center gap-2">
+        <div class="relative flex bg-white/5 p-1 rounded-full" id="filterCompContainer">
+          <div id="filterCompSlider" class="absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+          <button type="button" onclick="setFilter('comp','ALL')" id="compFilterAll" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop">All</button>
+          <button type="button" onclick="setFilter('comp','Theory')" id="compFilterTheory" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Theory</button>
+          <button type="button" onclick="setFilter('comp','Lab')" id="compFilterLab" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Lab</button>
+        </div>
+        <div class="relative flex bg-white/5 p-1 rounded-full overflow-x-auto custom-scrollbar" id="filterStatusContainer">
+          <div id="filterStatusSlider" class="absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none"></div>
+          <button type="button" onclick="setFilter('status','PRESENT')" id="statusFilterPresent" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Present</button>
+          <button type="button" onclick="setFilter('status','ABSENT')" id="statusFilterAbsent" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Absent</button>
+          <button type="button" onclick="setFilter('status','NOT_MARKED')" id="statusFilterNotMarked" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Unmarked</button>
+        </div>
+      </div>
+      <div id="upcomingSimulatorBar" class="p-6 border-b border-white/5 bg-white/[0.01] hidden">
+        <div class="flex justify-between items-end mb-4">
+          <div>
+            <span class="txt-micro text-neutral-500 block mb-1">Upcoming</span>
+            <span id="projStats" class="text-xl font-light text-white font-mono"></span>
+          </div>
+          <div class="text-right">
+            <span id="projPct" class="hidden text-xl font-light text-white font-mono"></span>
+            <span id="projDelta" class="hidden text-[10px] ml-2 text-neutral-400 font-mono"></span>
+          </div>
+        </div>
+        <div class="flex justify-between items-center">
+          <p id="projStatusText" class="text-xs text-neutral-500"></p>
+          <button type="button" onclick="resetModalUpcoming()" class="text-[10px] text-white/50 hover:text-white transition click-pop">Clear</button>
+        </div>
+      </div>
+      <div id="subModalContentList" class="p-4 h-[300px] overflow-y-auto space-y-2 custom-scrollbar"></div>
+    </div>
+  </div>
+  <div id="syncToast" class="fixed bottom-[-100px] right-5 glass flex items-center gap-3 px-4 py-3 border-white/10 transition-all duration-500 z-50">
+    <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+    <span class="text-xs font-medium text-white">Live data synced</span>
+  </div>
+  
+  <div id="loaderOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="glass-login-box flex flex-col items-center justify-center px-12 py-10 rounded-[32px]">
+        <div class="w-12 h-12 rounded-full border-4 border-white/10 border-t-white animate-spin mb-5"></div>
+        <p class="text-white text-sm font-mono font-medium animate-pulse tracking-widest" id="loaderText">CONNECTING</p>
+    </div>
+  </div>
+  
+  <script src="demo_data.js"></script>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let apiData = null; 
+    let scheduleMap = {}; 
+    let activeDay = null; 
+    let activeSemIndex = 0;
+    let isDemoMode = false;
+    
+    let activeCourseIndex = null; 
+    let activeModalTab = 'history'; 
+    let showingProjections = false; 
+    let currentMainView = 'attendance'; 
+    
+    let filterComp = 'ALL'; 
+    let filterStatus = 'ALL'; 
+    
+    let trackerInterval = null; 
+    let calViewMode = 'week'; 
+    let calCurrentDate = new Date();
+    let timeIndicatorInterval = null;
+    
+    let savedPlans = JSON.parse(localStorage.getItem("cp_plan") || "{}"); 
+    let savedODs = JSON.parse(localStorage.getItem("cp_ods") || "{}"); 
+    
+    let rProj = false;
+    let rSim = {};
+    let tgSem = null;
+    let tgCr = null;
+    
+    const gMap = {'S':10,'A+':9,'A':8,'B+':7,'B':6.5,'C+':6,'C':5,'U':0};
+    const gArr = ['S','A+','A','B+','B','C+','C','U'];
+
+    document.getElementById('headerDateLine').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+    const existingToken = localStorage.getItem('auth_token');
+    if (existingToken) {
+        document.getElementById('tokenInput').value = existingToken;
+        handleAuth();
+    }
+
+    const clrMap = ['bg-blue-500/10 border border-blue-500/20 text-blue-200','bg-purple-500/10 border border-purple-500/20 text-purple-200','bg-rose-500/10 border border-rose-500/20 text-rose-200','bg-amber-500/10 border border-amber-500/20 text-amber-200','bg-emerald-500/10 border border-emerald-500/20 text-emerald-200','bg-cyan-500/10 border border-cyan-500/20 text-cyan-200','bg-indigo-500/10 border border-indigo-500/20 text-indigo-200'];
+    let subClrDict = {};
+    let subClrIdx = 0;
+    function getSubjClr(a){if(!a)return clrMap[0];if(!subClrDict[a]){subClrDict[a]=clrMap[subClrIdx%clrMap.length];subClrIdx++;}return subClrDict[a];}
+
+    function animateCounter(id, value, duration = 1200) {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        const target = parseFloat(value);
+        if (isNaN(target)) { obj.innerText = value; return; }
+        
+        const start = parseFloat(obj.innerText) || 0;
+        if (start === target) { obj.innerText = target.toFixed(2); return; }
+
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const easeOut = 1 - Math.pow(1 - progress, 4); 
+            const current = start + (target - start) * easeOut;
+            obj.innerText = current.toFixed(2);
+            if (progress < 1) window.requestAnimationFrame(step);
+            else obj.innerText = target.toFixed(2);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    function syncToDB() {
+        if (isDemoMode) return;
+        let uId = localStorage.getItem('auth_uid') || "";
+        const t = localStorage.getItem('auth_token');
+        if (!t) return;
+        fetch(`${API_BASE}/api/user_data/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: t, user_id: uId, plan_json: JSON.stringify(savedPlans), od_json: JSON.stringify(savedODs) })
+        }).catch(() => {});
+    }
+
+    async function loadFromDB(token, uId) {
+        if (isDemoMode) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/user_data/load`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, user_id: uId, user_name: "" })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                savedPlans = data.plan || {};
+                savedODs = data.ods || {};
+            }
+        } catch(e) {
+            savedPlans = {}; savedODs = {};
+        }
+    }
+
+    function getCleanFirstName(fullName) {
+        if (!fullName || fullName === 'Student') return 'Student';
+        const cleanStr = fullName.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ').trim();
+        if (!cleanStr) return 'Student';
+        const parts = cleanStr.split(' ');
+        let validPart = parts.find(p => p.length > 1) || parts[0];
+        return validPart.charAt(0).toUpperCase() + validPart.slice(1).toLowerCase();
+    }
+
+    function formatProperName(rawName) {
+        if (!rawName || rawName === 'Student') return 'Student';
+        return rawName.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
+    function loadDemoMode() {
+        document.getElementById('tokenInput').value = "demo";
+        handleAuth();
+    }
+
+    async function handleAuth() {
+        const a = document.getElementById('tokenInput').value.trim();
+        if (!a) { showError('Token required'); return; }
+        
+        const b = document.getElementById('loaderOverlay');
+        const c = document.getElementById('loaderText');
+        b.classList.remove('hidden');
+        setTimeout(() => b.classList.remove('opacity-0'), 10);
+        
+        document.getElementById('errorMsg').classList.add('hidden');
+        document.getElementById('loadBtn').disabled = true;
+        if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = true;
+
+        if (a.toLowerCase() === 'demo') {
+            c.innerText = 'LOADING DEMO DATASET';
+            isDemoMode = true;
+            
+            setTimeout(() => {
+                if (typeof demoStudentData === 'undefined') {
+                    showError('demo_data.js file is missing or not linked.');
+                    b.classList.add('opacity-0');
+                    setTimeout(() => b.classList.add('hidden'), 300);
+                    document.getElementById('loadBtn').disabled = false;
+                    if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
+                    return;
+                }
+
+                apiData = JSON.parse(JSON.stringify(demoStudentData)); 
+                window.userProfileData = apiData.profileDetails;
+                document.getElementById('userHeading').innerText = `Hi, ${getCleanFirstName(apiData.profileDetails.fullName)}`;
+                document.getElementById('demoIndicator').classList.remove('hidden');
+                
+                initDashboard();
+                
+                document.getElementById('loadBtn').disabled = false;
+                if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
+                b.classList.add('opacity-0');
+                setTimeout(() => b.classList.add('hidden'), 300);
+            }, 800);
+            return;
+        }
+
+        let d = "";
+        let e = "Student";
+        try {
+            const f = a.split('.')[1];
+            if (f) {
+                const g = JSON.parse(atob(f.replace(/-/g, '+').replace(/_/g, '/')));
+                const h = String(g.userId || g.sub || g.id || g.ukid || "");
+                const i = h.match(/\d+/);
+                if (i) d = i[0];
+                e = g.name || g.firstName || g.preferred_username || "Student";
+            }
+        } catch(j) {}
+
+        try {
+            c.innerText = 'LOADING CACHE';
+            await loadFromDB(a, d);
+            const k = JSON.stringify({ token: a, user_id: d, user_name: e });
+
+            c.innerText = 'FETCHING API';
+            const l = await fetch(`${API_BASE}/api/attendance`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: k
+            });
+            const m = await fetch(`${API_BASE}/api/results`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: k
+            });
+
+            if (!l.ok) throw new Error();
+            
+            c.innerText = 'BUILDING UI';
+            apiData = await l.json();
+            
+            if (m.ok) {
+                const n = await m.json();
+                apiData.semesters = n.semesters || [];
+            } else {
+                apiData.semesters = [];
+            }
+            
+            let o = apiData.profileDetails?.fullName || apiData.studentName || e || 'Student';
+            document.getElementById('userHeading').innerText = `Hi, ${getCleanFirstName(o)}`;
+
+            window.userProfileData = apiData.profileDetails || {
+                fullName: formatProperName(o), email: '--', phone: '--', programme: '--', batchYear: '--', quota: '--', admissionType: '--', profilePic: ''
+            };
+            window.userProfileData.fullName = formatProperName(o);
+            
+            if (apiData && apiData.courses) {
+                apiData.courses.forEach(p => {
+                    p.simPresent = p.present;
+                    p.simTotal = p.total;
+                    if (p.components) {
+                        p.components.forEach(q => {
+                            q.simPresent = q.present;
+                            q.simTotal = q.total;
+                        });
+                    }
+                });
+            }
+
+            localStorage.setItem('auth_token', a);
+            localStorage.setItem('auth_uid', d);
+            localStorage.setItem('cp_plan', JSON.stringify(savedPlans));
+            localStorage.setItem('cp_ods', JSON.stringify(savedODs));
+            
+            updateTokenExpiry(a);
+            initDashboard();
+        } catch (r) {
+            showError('Connection failed.');
+        } finally {
+            document.getElementById('loadBtn').disabled = false;
+            if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
+            b.classList.add('opacity-0');
+            setTimeout(() => b.classList.add('hidden'), 300);
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        if (trackerInterval) clearInterval(trackerInterval);
+        if (timeIndicatorInterval) clearInterval(timeIndicatorInterval);
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('profileBtn').classList.add('hidden');
+        document.getElementById('tokenInput').value = '';
+        document.getElementById('userHeading').innerText = 'Hi, Student';
+        rProj = false;
+        rSim = {};
+        
+        isDemoMode = false;
+        document.getElementById('demoIndicator').classList.add('hidden');
+        if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
+    }
+
+    function openProfileModal() {
+        const p = window.userProfileData || {};
+        document.getElementById('profileFullName').innerText = p.fullName || 'Student';
+        document.getElementById('profileProgramme').innerText = p.programme || 'B.Tech Program';
+        document.getElementById('profileEmail').innerText = p.email || '--';
+        document.getElementById('profilePhone').innerText = p.phone || '--';
+        document.getElementById('profileBatch').innerText = p.batchYear || '--';
+        document.getElementById('profileQuota').innerText = p.quota || '--';
+        document.getElementById('profileAdmission').innerText = p.admissionType || '--';
+
+        const picImg = document.getElementById('profilePicImg');
+        if (p.profilePic) {
+            picImg.src = p.profilePic;
+            picImg.classList.remove('hidden');
+        } else {
+            picImg.classList.add('hidden');
+        }
+
+        const modal = document.getElementById('profileModal');
+        const inner = document.getElementById('profileModalInner');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            inner.classList.remove('translate-y-10');
+        }, 10);
+    }
+
+    function closeProfileModal() {
+        const modal = document.getElementById('profileModal');
+        const inner = document.getElementById('profileModalInner');
+        modal.classList.add('opacity-0');
+        inner.classList.add('translate-y-10');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('errorMsg');
+        el.querySelector('p').innerText = msg;
+        el.classList.remove('hidden');
+    }
+
+    function updateTokenExpiry(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (!payload.exp) return;
+            const diff = (payload.exp * 1000) - Date.now();
+            const tag = document.getElementById('tokenExpiryTag');
+            if (tag) {
+                tag.classList.remove('hidden');
+                if (diff <= 0) {
+                    tag.innerText = 'EXPIRED';
+                } else {
+                    const d = Math.floor(diff / 86400000);
+                    const h = Math.floor((diff % 86400000) / 3600000);
+                    tag.innerText = d > 0 ? `${d}d ${h}h` : `${h}h`;
+                }
+            }
+        } catch {}
+    }
+
+    function updateSliderPosition(activeBtn, sliderId) {
+        const slider = document.getElementById(sliderId);
+        if (slider && activeBtn) {
+            slider.style.left = `${activeBtn.offsetLeft}px`;
+            slider.style.width = `${activeBtn.offsetWidth}px`;
+        }
+    }
+
+    function switchAttView(view) {
+        const btnC = document.getElementById('attTabCourses');
+        const btnA = document.getElementById('attTabActivity');
+        const cntC = document.getElementById('attContentCourses');
+        const cntA = document.getElementById('attContentActivity');
+        
+        let activeBtn = view === 'courses' ? btnC : btnA;
+        updateSliderPosition(activeBtn, 'attSubSlider');
+        
+        btnC.className = btnC === activeBtn ? 'relative z-10 flex-1 py-2 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 flex-1 py-2 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+        btnA.className = btnA === activeBtn ? 'relative z-10 flex-1 py-2 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 flex-1 py-2 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+        
+        if(view === 'courses') {
+            cntC.classList.remove('hidden');
+            cntA.classList.add('hidden');
+        } else {
+            cntC.classList.add('hidden');
+            cntA.classList.remove('hidden');
+            renderTimeline();
+        }
+    }
+
+    function initDashboard() {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+        document.getElementById('profileBtn').classList.remove('hidden');
+
+        buildScheduleMap();
+        updateOverallCard();
+        renderCoursesList();
+        updateLiveTracker();
+
+        setTimeout(() => {
+            updateSliderPosition(document.getElementById('navAttendanceBtn'), 'navSlider');
+            updateSliderPosition(document.getElementById('attTabCourses'), 'attSubSlider');
+        }, 50);
+
+        if (trackerInterval) clearInterval(trackerInterval);
+        trackerInterval = setInterval(updateLiveTracker, 30000);
+
+        if (currentMainView === 'timetable') renderTimetableTabs();
+        if (currentMainView === 'results') renderResultsView();
+    }
+
+    function switchView(viewName) {
+        currentMainView = viewName;
+        const btnAtt = document.getElementById('navAttendanceBtn');
+        const btnTime = document.getElementById('navTimetableBtn');
+        const btnRes = document.getElementById('navResultsBtn');
+        
+        const secAtt = document.getElementById('viewAttendance');
+        const secTime = document.getElementById('viewTimetable');
+        const secRes = document.getElementById('viewResults');
+        const liveContainer = document.getElementById('liveStatusContainer');
+
+        secAtt.classList.add('hidden');
+        secTime.classList.add('hidden');
+        secRes.classList.add('hidden');
+
+        let activeBtn = btnAtt;
+        if (viewName === 'attendance') {
+            secAtt.classList.remove('hidden');
+            if (liveContainer) liveContainer.style.display = '';
+            activeBtn = btnAtt;
+        } else if (viewName === 'timetable') {
+            secTime.classList.remove('hidden');
+            if (liveContainer) liveContainer.style.display = '';
+            renderTimetableTabs();
+            activeBtn = btnTime;
+        } else if (viewName === 'results') {
+            secRes.classList.remove('hidden');
+            if (liveContainer) liveContainer.style.display = 'none';
+            renderResultsView();
+            activeBtn = btnRes;
+        }
+
+        updateSliderPosition(activeBtn, 'navSlider');
+
+        [btnAtt, btnTime, btnRes].forEach(b => {
+            b.className = b === activeBtn ? 'relative z-10 flex-1 py-3 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 flex-1 py-3 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+        });
+    }
+
+    function tglResProj(){
+        rProj=!rProj;
+        let a=document.getElementById('resProjBtn');
+        if(rProj){a.innerText='Real Data';a.className='btn-anim-base btn-active-attend px-5 py-2.5 text-xs flex-1 click-pop';}
+        else{a.innerText='Toggle Projections';a.className='btn-clean px-5 py-2.5 text-xs flex-1 click-pop';}
+        renderResultsView();
+    }
+
+    function rstResProj(){rSim={};renderResultsView();}
+
+    function openGradeSelector(a, b) {
+        tgSem = a; tgCr = b;
+        const c = document.getElementById('gradeSelectorModal');
+        const d = document.getElementById('gradeSelectorInner');
+        
+        const e = a + '_' + b;
+        const f = rSim[e] || apiData.semesters[a].courses[b].grade || 'U';
+        
+        let g = '';
+        for (let h = 0; h < gArr.length; h++) {
+            let i = gArr[h];
+            let j = i === f;
+            let k = j ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.1)]' : 'bg-white/5 border-white/10 text-neutral-300 hover:bg-white/10 hover:border-white/20';
+            g += `<button type="button" onclick="setProjectedGrade('${i}')" class="flex flex-col items-center justify-center py-2.5 rounded-[20px] border transition-all duration-300 click-pop ${k}">
+                <span class="text-base font-medium font-mono">${i}</span>
+                <span class="text-[9px] opacity-50 font-mono mt-1">${gMap[i]} GP</span>
+            </button>`;
+        }
+        document.getElementById('gradeSelectorList').innerHTML = g;
+        
+        c.classList.remove('hidden');
+        setTimeout(() => {
+            c.classList.remove('opacity-0');
+            d.classList.remove('scale-95', 'translate-y-4');
+        }, 10);
+    }
+
+    function closeGradeSelector() {
+        const a = document.getElementById('gradeSelectorModal');
+        const b = document.getElementById('gradeSelectorInner');
+        a.classList.add('opacity-0');
+        b.classList.add('scale-95', 'translate-y-4');
+        setTimeout(() => a.classList.add('hidden'), 300);
+    }
+
+    function setProjectedGrade(a) {
+        if (tgSem !== null && tgCr !== null) {
+            rSim[tgSem + '_' + tgCr] = a;
+            renderResultsView();
+        }
+        closeGradeSelector();
+    }
+
+    function renderResultsView() {
+        const tabsEl = document.getElementById('semTabsContainer');
+        const contentEl = document.getElementById('semContentContainer');
+        const cgpaEl = document.getElementById('resultsCgpaVal');
+        const semTitleEl = document.getElementById('resultsSemTitle');
+        const sgpaCircle = document.getElementById('sgpaCircle');
+        const currentSgpaEl = document.getElementById('resultsCurrentSgpaVal');
+        
+        if (!tabsEl || !contentEl || !apiData.semesters) return;
+
+        const sems = apiData.semesters;
+
+        if (sems.length === 0) {
+            contentEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">No results data found.</div>`;
+            if (cgpaEl) cgpaEl.innerText = '--';
+            if (currentSgpaEl) currentSgpaEl.innerText = '0.00';
+            if (semTitleEl) semTitleEl.innerText = 'No Data';
+            if (sgpaCircle) sgpaCircle.style.strokeDashoffset = '289';
+            tabsEl.innerHTML = '';
+            return;
+        }
+
+        if (activeSemIndex >= sems.length) activeSemIndex = 0;
+        const currentSem = sems[activeSemIndex];
+
+        let tc = 0; let tgp = 0; let mod = false;
+        
+        sems.forEach((sem, sIdx) => {
+            let semCredits = 0;
+            let semWeightedPoints = 0;
+            let hasValidCourses = false;
+
+            sem.courses.forEach((c, cIdx) => {
+                let creds = parseFloat(c.credits) || 0;
+                let grade = c.grade;
+                let gp = parseFloat(c.gp) || 0;
+                let key = sIdx + '_' + cIdx;
+
+                if (rProj && rSim[key]) {
+                    grade = rSim[key];
+                    gp = gMap[grade];
+                    mod = true;
+                }
+
+                if (creds > 0 && grade && grade !== '--') {
+                    semCredits += creds;
+                    semWeightedPoints += (creds * gp);
+                    hasValidCourses = true;
+                }
+            });
+
+            let effectiveSgpa = 0;
+            if (rProj && sem.courses.some((_, cIdx) => rSim[sIdx + '_' + cIdx])) {
+                effectiveSgpa = semCredits > 0 ? (semWeightedPoints / semCredits) : 0;
+            } else {
+                effectiveSgpa = parseFloat(sem.sgpa) || (semCredits > 0 ? (semWeightedPoints / semCredits) : 0);
+            }
+
+            if (semCredits > 0 && hasValidCourses) {
+                tc += semCredits;
+                tgp += (effectiveSgpa * semCredits);
+            }
+        });
+        
+        let cGpa = tc > 0 ? (tgp / tc).toFixed(2) : '--';
+        
+        let activeSemSgpa = 0;
+        if (rProj && currentSem.courses.some((_, cIdx) => rSim[activeSemIndex + '_' + cIdx])) {
+            let sc = 0, sw = 0;
+            currentSem.courses.forEach((c, cIdx) => {
+                let e = parseFloat(c.credits) || 0;
+                let k = activeSemIndex + '_' + cIdx;
+                let g = rSim[k] || c.grade;
+                let p = g !== undefined ? gMap[g] || 0 : 0;
+                if (e > 0) { sc += e; sw += (e * p); }
+            });
+            activeSemSgpa = sc > 0 ? (sw / sc) : 0;
+        } else {
+            activeSemSgpa = parseFloat(currentSem.sgpa) || 0;
+        }
+
+        if (cgpaEl) {
+            if (rProj && mod) cgpaEl.innerHTML = `<span class="text-[9px] bg-white text-black px-2 py-0.5 rounded mr-2 align-middle font-mono">SIMULATED</span>${cGpa}`;
+            else cgpaEl.innerHTML = cGpa;
+        }
+        
+        if (semTitleEl) semTitleEl.innerText = currentSem.termName || `Semester ${activeSemIndex + 1}`;
+
+        if (sgpaCircle && currentSgpaEl) {
+            animateCounter('resultsCurrentSgpaVal', activeSemSgpa.toFixed(2));
+            
+            const circ = 289;
+            const offset = circ - (activeSemSgpa / 10) * circ;
+            
+            if (!sgpaCircle.dataset.init) {
+                sgpaCircle.style.transition = 'none';
+                sgpaCircle.style.strokeDashoffset = '289';
+                void sgpaCircle.offsetWidth;
+                sgpaCircle.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1), stroke 0.5s ease';
+                sgpaCircle.dataset.init = 'true';
+            }
+            sgpaCircle.style.strokeDashoffset = offset;
+            
+            if (rProj && mod) {
+                sgpaCircle.style.stroke = '#34d399';
+                document.getElementById('resLiveDot').classList.replace('bg-white', 'bg-emerald-400');
+            } else {
+                sgpaCircle.style.stroke = '#ffffff';
+                document.getElementById('resLiveDot').classList.replace('bg-emerald-400', 'bg-white');
+            }
+        }
+
+        const resRstBtn = document.getElementById('resRstBtn');
+        if (resRstBtn) {
+            if (rProj && Object.keys(rSim).length > 0) resRstBtn.classList.remove('hidden');
+            else resRstBtn.classList.add('hidden');
+        }
+
+        let slider = document.getElementById('semSlider');
+        if (!slider) {
+            slider = document.createElement('div');
+            slider.id = 'semSlider';
+            slider.className = 'absolute top-1.5 bottom-1.5 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none';
+            tabsEl.appendChild(slider);
+        }
+
+        Array.from(tabsEl.children).forEach(child => {
+            if (child !== slider) child.remove();
+        });
+
+        let activeBtnEl = null;
+
+        sems.forEach((s, idx) => {
+            const isSel = (idx === activeSemIndex);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerText = s.termName || `Sem ${idx + 1}`;
+            btn.className = `relative z-10 flex-1 px-2 py-2.5 rounded-full text-[10px] sm:text-xs font-medium transition-colors duration-300 click-pop whitespace-nowrap text-center ${isSel ? 'text-black font-semibold' : 'text-neutral-400 hover:text-white'}`;
+            btn.onclick = () => switchSem(idx);
+            tabsEl.appendChild(btn);
+
+            if (isSel) activeBtnEl = btn;
+        });
+
+        if (activeBtnEl) {
+            updateSliderPosition(activeBtnEl, 'semSlider');
+        }
+
+        let coursesHtml = '';
+        currentSem.courses.forEach((c, d) => {
+            let k = activeSemIndex + '_' + d;
+            let g = c.grade || '--';
+            let p = c.gp !== undefined ? c.gp : '--';
+            let isSim = false;
+            
+            if (rProj && rSim[k]) {
+                g = rSim[k];
+                p = gMap[g];
+                isSim = true;
+            }
+
+            let rBtn = '';
+            let onClickAction = `openResultDetailModal(${activeSemIndex}, ${d})`;
+
+            if (rProj) {
+                onClickAction = `openGradeSelector(${activeSemIndex}, ${d})`; 
+                rBtn = `<button type="button" class="w-12 h-10 rounded-2xl ${isSim ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/5 text-white border border-transparent'} flex items-center justify-center font-mono font-medium text-xs flex-shrink-0 transition-all duration-300 cursor-pointer hover:brightness-125">${g}</button>`;
+            } else {
+                rBtn = `<div class="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center font-mono font-medium text-white text-xs flex-shrink-0">${g}</div>`;
+            }
+
+            coursesHtml += `
+            <div ${onClickAction ? `onclick="${onClickAction}"` : ''} class="glass p-5 flex items-center justify-between gap-4 ${!rProj ? 'cursor-pointer hover:border-white/20' : ''} transition click-pop">
+                <div class="min-w-0 flex-1">
+                    <p class="font-medium text-sm text-white truncate mb-1">${c.name}</p>
+                    <p class="text-[10px] font-mono text-neutral-500">${c.code} // Credits: ${c.credits} // GP: ${p}</p>
+                </div>
+                ${rBtn}
+            </div>`;
+        });
+        contentEl.innerHTML = coursesHtml;
+    }
+
+    function switchSem(idx) {
+        activeSemIndex = idx;
+        renderResultsView();
+    }
+
+    async function openResultDetailModal(semIdx, courseIdx) {
+        const course = apiData.semesters[semIdx].courses[courseIdx];
+        document.getElementById('resDetName').innerText = course.name;
+        document.getElementById('resDetGrade').innerText = course.grade || '--';
+        document.getElementById('resDetGP').innerText = course.gp !== undefined ? course.gp : '--';
+        document.getElementById('resDetCred').innerText = course.credits || '--';
+
+        const contentDiv = document.getElementById('resDetBreakdownContent');
+        const loaderDiv = document.getElementById('resDetBreakdownLoader');
+        contentDiv.innerHTML = '';
+        
+        const modal = document.getElementById('resultDetailModal');
+        const inner = document.getElementById('resultDetailInner');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            inner.classList.remove('translate-y-10');
+        }, 10);
+
+        if (!course.examId || !course.termCourseId) return;
+
+        loaderDiv.classList.remove('hidden');
+
+        try {
+            const token = localStorage.getItem('auth_token');
+            const uId = localStorage.getItem('auth_uid');
+            const res = await fetch(`${API_BASE}/api/result_breakdown`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, user_id: uId, exam_id: String(course.examId), term_course_id: String(course.termCourseId) })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                let breakdownHtml = '';
+
+                if (data.components && data.components.length > 0) {
+                    data.components.forEach(comp => {
+                        breakdownHtml += `<div class="bg-white/5 rounded-2xl p-4 mb-3">`;
+                        breakdownHtml += `<span class="txt-micro text-neutral-500 mb-3 block border-b border-white/5 pb-2">${comp.componentName}</span>`;
+                        
+                        if (comp.assessments && comp.assessments.length > 0) {
+                            comp.assessments.forEach(ass => {
+                                breakdownHtml += `
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-neutral-300 font-mono">${ass.assessmentName}</span>
+                                    <span class="text-xs font-mono text-white font-medium">${ass.obtainedMarks} <span class="text-neutral-500">/ ${ass.totalMarks}</span></span>
+                                </div>`;
+                            });
+                        }
+                        
+                        breakdownHtml += `
+                            <div class="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
+                                <span class="text-xs text-neutral-400 font-mono">Effective</span>
+                                <span class="text-xs font-mono text-white font-medium">${parseFloat(comp.effectiveMarks).toFixed(1)} <span class="text-neutral-500">/ ${comp.totalMarks}</span></span>
+                            </div>
+                        </div>`;
+                    });
+                } else if (data.marks) {
+                    breakdownHtml = `
+                    <div class="bg-white/5 rounded-2xl p-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-neutral-400 font-mono">Total Marks</span>
+                            <span class="text-xs font-mono text-white font-medium">${parseFloat(data.marks).toFixed(1)}</span>
+                        </div>
+                    </div>`;
+                }
+
+                contentDiv.innerHTML = breakdownHtml;
+            }
+        } catch (e) {}
+
+        loaderDiv.classList.add('hidden');
+    }
+
+    function closeResultDetailModal() {
+        const modal = document.getElementById('resultDetailModal');
+        const inner = document.getElementById('resultDetailInner');
+        modal.classList.add('opacity-0');
+        inner.classList.add('translate-y-10');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+
+    function calcAttendanceMath(present, total) {
+        if (total <= 0) return { pct: '0.0', status: '--', safe: true, margin: 0 };
+        const pct = ((present / total) * 100).toFixed(1);
+        const isSafe = parseFloat(pct) >= 75;
+        let statusText, margin = 0;
+        
+        if (isSafe) {
+            margin = Math.floor((present - 0.75 * total) / 0.75);
+            statusText = `Safe to miss ${Math.max(0, margin)}`;
+        } else {
+            const deficit = Math.floor(((0.75 * total) - present) / 0.25) + 1;
+            statusText = `Need ${deficit} more`;
+        }
+        return { pct: pct, status: statusText, safe: isSafe, margin: Math.max(0, margin) };
+    }
+
+    function calculateStreak(historyArray) {
+        let streak = 0;
+        for (let log of historyArray) {
+            const s = (log.status || '').toUpperCase();
+            if (s === "PRESENT" || s === "P") streak++;
+            else if (s === "ABSENT" || s === "A") break;
+        }
+        return streak;
+    }
+
+    function parseSafeDate(str) {
+        return str ? new Date(str.replace(' ', 'T')) : null;
+    }
+
+    function toLocalDateStr(dateObj) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function formatTimeString(str) {
+        if (!str) return '';
+        const parts = str.split(' ');
+        if (parts.length < 2) return str;
+        const [hh, mm] = parts[1].split(':');
+        let h = parseInt(hh, 10);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${mm} ${ampm}`;
+    }
+
+    function formatDateString(str) {
+        if (!str) return '';
+        const d = new Date(str.replace(' ', 'T'));
+        return isNaN(d) ? str.split(' ')[0] : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    
+    function formatStatus(status) {
+        const s = (status || '').toUpperCase();
+        if (s === 'NOT_MARKED' || s === 'UNMARKED' || s === 'PENDING') return 'Not Marked';
+        return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+    }
+
+    function triggerFlash(elementId) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.classList.remove('update-flash');
+            void el.offsetWidth;
+            el.classList.add('update-flash');
+        }
+    }
+
+    function toggleProjections() {
+        showingProjections = !showingProjections;
+        const btn = document.getElementById('masterProjBtn');
+        if(btn) {
+            btn.innerText = showingProjections ? 'Real Data' : 'Toggle Projections';
+            btn.className = showingProjections ? 'px-5 py-2.5 text-xs flex-1 btn-active click-pop' : 'btn-clean px-5 py-2.5 text-xs flex-1 click-pop';
+        }
+        updateOverallCard();
+    }
+
+    function resetAllProjections() {
+        savedPlans = {};
+        savedODs = {};
+        syncToDB();
+        
+        if (apiData && apiData.courses) {
+            apiData.courses.forEach((c, idx) => {
+                c.simPresent = c.present;
+                c.simTotal = c.total;
+                if (c.components) {
+                    c.components.forEach(comp => {
+                        comp.simPresent = comp.present;
+                        comp.simTotal = comp.total;
+                    });
+                }
+                updateSingleCourseCard(idx);
+            });
+        }
+        
+        showingProjections = false;
+        const btn = document.getElementById('masterProjBtn');
+        if(btn) {
+            btn.innerText = 'Toggle Projections';
+            btn.className = 'btn-clean px-5 py-2.5 text-xs flex-1 click-pop';
+        }
+        updateOverallCard();
+    }
+
+    function updateOverallCard() {
+        if (!apiData) return;
+        let basePresent = apiData.totalPresent;
+        let baseTotal = apiData.totalClasses;
+        let addedPresent = 0;
+        let addedTotal = 0;
+
+        for (const course in savedODs) {
+            for (const key in savedODs[course]) {
+                if (savedODs[course][key]) addedPresent++;
+            }
+        }
+        for (const course in savedPlans) {
+            for (const key in savedPlans[course]) {
+                const dec = savedPlans[course][key];
+                if (dec === 'attend') { addedPresent++; addedTotal++; } 
+                else if (dec === 'bunk') { addedTotal++; }
+            }
+        }
+        apiData.courses.forEach(c => {
+            if (c.simTotal !== undefined && c.total !== undefined && c.simTotal !== c.total) {
+                addedPresent += c.simPresent - c.present;
+                addedTotal += c.simTotal - c.total;
+            }
+        });
+
+        const hasMods = (addedPresent !== 0 || addedTotal !== 0);
+        const resetBtn = document.getElementById('masterResetBtn');
+        if (resetBtn) {
+            hasMods ? resetBtn.classList.remove('hidden') : resetBtn.classList.add('hidden');
+        }
+
+        const badge = document.getElementById('overallDeltaBadge');
+        let displayPct, displayPresent, displayTotal;
+
+        if (showingProjections && hasMods) {
+            displayPresent = basePresent + addedPresent;
+            displayTotal = baseTotal + addedTotal;
+            const stats = calcAttendanceMath(displayPresent, displayTotal);
+            displayPct = stats.pct;
+            
+            const countsEl = document.getElementById('overallCounts');
+            if (countsEl) countsEl.innerText = `${displayPresent} / ${displayTotal} SIMULATED`;
+            
+            if (badge) badge.classList.remove('hidden');
+        } else {
+            displayPct = apiData.percentage;
+            displayPresent = basePresent;
+            displayTotal = baseTotal;
+            
+            const countsEl = document.getElementById('overallCounts');
+            if (countsEl) countsEl.innerText = `${basePresent} / ${baseTotal}`;
+            
+            if (badge) badge.classList.add('hidden');
+        }
+
+        animateCounter('overallPct', displayPct);
+        triggerFlash('overallCounts');
+
+        const stats = calcAttendanceMath(displayPresent, displayTotal);
+
+        const circ = 289; 
+        const offset = circ - (parseFloat(displayPct) / 100) * circ;
+        const svgCircle = document.getElementById('circleProgress');
+        
+        if (svgCircle) {
+            if (!svgCircle.dataset.init) {
+                svgCircle.style.transition = 'none';
+                svgCircle.style.strokeDashoffset = '289';
+                void svgCircle.offsetWidth;
+                svgCircle.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1)';
+                svgCircle.dataset.init = 'true';
+            }
+            svgCircle.style.strokeDashoffset = offset;
+            svgCircle.style.stroke = '#ffffff'; 
+        }
+
+        const statusEl = document.getElementById('overallStatus');
+        if (statusEl) {
+            statusEl.innerHTML = `<span class="txt-micro text-neutral-400">${stats.status}</span>`;
+        }
+    }
+
+    function renderCoursesList() {
+        const listEl = document.getElementById('courseList');
+        if (!listEl || !apiData || !apiData.courses) return;
+
+        let htmlBuilder = '';
+
+        apiData.courses.forEach((course, idx) => {
+            const streak = calculateStreak(course.history || []);
+            const streakHtml = streak >= 3 ? `<span class="txt-micro bg-white/10 px-2 py-1 rounded">🔥 ${streak}</span>` : '';
+
+            let compHtml = '';
+            const validComps = course.components ? course.components.filter(c => c.total > 0) : [];
+            
+            if (validComps.length > 0) {
+                compHtml = `<div class="mt-4 pt-4 border-t border-white/5 space-y-3">`;
+                validComps.forEach((comp) => {
+                    const cIdx = course.components.indexOf(comp);
+                    const cLabel = comp.label === 'Lab' ? 'Lab' : 'Theory';
+                    const isBelowThreshold = comp.pct < 75;
+                    const compDot = isBelowThreshold ? `<div class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(243,113,133,0.8)] inline-block ml-1 align-middle"></div>` : '';
+                    compHtml += `
+                    <div class="bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] rounded-2xl p-4 transition-all duration-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-neutral-400 font-medium">${cLabel} ${compDot} <span id="comp-count-${idx}-${cIdx}" class="font-mono text-[9px] ml-1 text-neutral-500"></span></span>
+                            <div class="flex items-baseline gap-0.5">
+                                <span id="comp-pct-${idx}-${cIdx}" class="font-mono text-xs text-white">0.0</span>
+                                <span class="font-mono text-[9px] text-neutral-500">%</span>
+                            </div>
+                        </div>
+                        <div class="progress-track mb-3">
+                            <div id="comp-bar-${idx}-${cIdx}" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <button type="button" id="comp-reset-${idx}-${cIdx}" onclick="resetComponent(${idx},${cIdx})" class="hidden txt-micro text-neutral-500 hover:text-white transition click-pop">Reset</button>
+                            <div class="flex gap-2 ml-auto">
+                                <button type="button" onclick="simComponent(${idx},${cIdx},'bunk')" class="btn-anim-base btn-bunk px-4 py-1.5 text-[10px]">Bunk</button>
+                                <button type="button" onclick="simComponent(${idx},${cIdx},'attend')" class="btn-anim-base btn-attend px-4 py-1.5 text-[10px]">Attend</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                compHtml += '</div>';
+            }
+
+            htmlBuilder += `
+            <div class="glass p-6 fade-in hover:border-white/20 transition-all duration-300 shadow-lg shadow-black/40">
+                <div onclick="openModal(${idx})" class="cursor-pointer group">
+                    <div class="flex justify-between items-end mb-4">
+                        <div class="flex-1 pr-4">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-medium text-sm text-white group-hover:text-neutral-300 transition truncate">${course.name}</h4>
+                                <div id="course-alert-${idx}" class="hidden w-1.5 h-1.5 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(243,113,133,0.5)]"></div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1">
+                                ${streakHtml}
+                                <p id="course-meta-${idx}" class="text-[10px] text-neutral-400 font-mono"></p>
+                            </div>
+                            <p id="course-target-${idx}" class="text-[10px] text-white/60 font-mono mt-1 hidden"></p>
+                        </div>
+                        <div class="flex items-baseline gap-0.5">
+                            <span id="course-pct-${idx}" class="text-2xl font-light text-white font-mono">0.0</span>
+                            <span class="text-xs text-neutral-500 font-mono">%</span>
+                        </div>
+                    </div>
+                    <div class="progress-track">
+                        <div id="course-bar-${idx}" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-3">
+                    <span id="course-badge-${idx}" class="txt-micro text-neutral-400 font-mono"></span>
+                    <button type="button" id="course-reset-${idx}" onclick="resetCourseSim(${idx})" class="hidden txt-micro text-neutral-500 hover:text-white transition click-pop">Reset All</button>
+                </div>
+                ${compHtml}
+            </div>`;
+        });
+
+        listEl.innerHTML = htmlBuilder;
+
+        setTimeout(() => {
+            apiData.courses.forEach((_, idx) => {
+                updateSingleCourseCard(idx);
+            });
+        }, 50);
+    }
+
+    function updateSingleCourseCard(idx) {
+        const course = apiData.courses[idx];
+        const stats = calcAttendanceMath(course.simPresent, course.simTotal);
+        const isModified = (course.simTotal !== course.total);
+
+        const pctEl = document.getElementById(`course-pct-${idx}`);
+        if (pctEl) {
+            animateCounter(`course-pct-${idx}`, stats.pct);
+            pctEl.className = `text-2xl font-light font-mono ${stats.safe ? 'text-white' : 'text-neutral-400'}`;
+        }
+
+        const metaEl = document.getElementById(`course-meta-${idx}`);
+        if (metaEl) {
+            metaEl.innerHTML = `${course.simPresent}/${course.simTotal}${isModified ? ' <span class="text-white ml-1">SIM</span>' : ''}`;
+        }
+
+        const dotEl = document.getElementById(`course-alert-${idx}`);
+        if (dotEl) {
+            stats.safe ? dotEl.classList.add('hidden') : dotEl.classList.remove('hidden');
+        }
+
+        const tgtEl = document.getElementById(`course-target-${idx}`);
+        if (tgtEl) {
+            let targetText = '';
+            if (stats.margin > 0 && course.scheduled && course.scheduled.length) {
+                const now = new Date();
+                const futureSlots = course.scheduled
+                    .filter(s => { const t = parseSafeDate(s.start); return t && t > now; })
+                    .sort((a, b) => parseSafeDate(a.start) - parseSafeDate(b.start));
+                
+                if (futureSlots.length) {
+                    const targetSlot = futureSlots[Math.min(stats.margin - 1, futureSlots.length - 1)];
+                    const td = parseSafeDate(targetSlot.start);
+                    if (td) targetText = `Safe until ${td.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, ${formatTimeString(targetSlot.start)}`;
+                }
+            }
+            if (targetText) {
+                tgtEl.innerText = targetText;
+                tgtEl.classList.remove('hidden');
+            } else {
+                tgtEl.classList.add('hidden');
+            }
+        }
+
+        const barEl = document.getElementById(`course-bar-${idx}`);
+        if (barEl) {
+            barEl.style.width = `${Math.min(100, parseFloat(stats.pct))}%`;
+            barEl.style.background = '#ffffff';
+        }
+
+        const badgeEl = document.getElementById(`course-badge-${idx}`);
+        if (badgeEl) badgeEl.innerText = stats.status;
+
+        const resetEl = document.getElementById(`course-reset-${idx}`);
+        if (resetEl) {
+            isModified ? resetEl.classList.remove('hidden') : resetEl.classList.add('hidden');
+        }
+
+        if (course.components) {
+            course.components.forEach((comp, cIdx) => {
+                if (comp.total <= 0) return;
+                const cStats = calcAttendanceMath(comp.simPresent, comp.simTotal);
+                const cMod = (comp.simTotal !== comp.total);
+
+                const countEl = document.getElementById(`comp-count-${idx}-${cIdx}`);
+                if (countEl) countEl.innerHTML = `${comp.simPresent}/${comp.simTotal}${cMod ? '*' : ''}`;
+
+                const cPctEl = document.getElementById(`comp-pct-${idx}-${cIdx}`);
+                if (cPctEl) {
+                    animateCounter(`comp-pct-${idx}-${cIdx}`, cStats.pct);
+                    cPctEl.className = `font-mono text-xs ${cStats.safe ? 'text-white' : 'text-neutral-400'}`;
+                }
+
+                const cBarEl = document.getElementById(`comp-bar-${idx}-${cIdx}`);
+                if (cBarEl) {
+                    cBarEl.style.width = `${Math.min(100, parseFloat(cStats.pct))}%`;
+                    cBarEl.style.background = '#ffffff';
+                }
+
+                const cRstEl = document.getElementById(`comp-reset-${idx}-${cIdx}`);
+                if (cRstEl) {
+                    cMod ? cRstEl.classList.remove('hidden') : cRstEl.classList.add('hidden');
+                }
+            });
+        }
+
+        if (idx === activeCourseIndex && !document.getElementById('subjectModal').classList.contains('hidden')) {
+            if (activeModalTab === 'history') renderModalHistory();
+            else renderModalUpcoming();
+        }
+    }
+
+    function simComponent(courseIdx, compIdx, action) {
+        const course = apiData.courses[courseIdx];
+        const comp = course.components[compIdx];
+        if (action === 'attend') {
+            comp.simPresent++; comp.simTotal++;
+            course.simPresent++; course.simTotal++;
+        } else {
+            comp.simTotal++;
+            course.simTotal++;
+        }
+        triggerFlash(`comp-pct-${courseIdx}-${compIdx}`);
+        triggerFlash(`comp-count-${courseIdx}-${compIdx}`);
+        triggerFlash(`course-pct-${courseIdx}`);
+        updateSingleCourseCard(courseIdx);
+        updateOverallCard();
+        if (filterComp !== 'ALL') renderModalHistory();
+    }
+
+    function resetComponent(courseIdx, compIdx) {
+        const course = apiData.courses[courseIdx];
+        const comp = course.components[compIdx];
+        course.simPresent -= (comp.simPresent - comp.present);
+        course.simTotal -= (comp.simTotal - comp.total);
+        comp.simPresent = comp.present;
+        comp.simTotal = comp.total;
+        updateSingleCourseCard(courseIdx);
+        updateOverallCard();
+        if (filterComp !== 'ALL') renderModalHistory();
+    }
+
+    function resetCourseSim(courseIdx) {
+        const course = apiData.courses[courseIdx];
+        course.simPresent = course.present;
+        course.simTotal = course.total;
+        if (course.components) {
+            course.components.forEach(c => {
+                c.simPresent = c.present;
+                c.simTotal = c.total;
+            });
+        }
+        updateSingleCourseCard(courseIdx);
+        updateOverallCard();
+        if (filterComp !== 'ALL') renderModalHistory();
+    }
+
+    function updateModalGraph(pct, safe) {
+        const mCircle = document.getElementById('subModalCircle');
+        animateCounter('subModalCircleText', pct);
+        
+        if (mCircle) {
+            const circ = 226.2;
+            const offset = circ - (parseFloat(pct) / 100) * circ;
+            mCircle.style.strokeDashoffset = offset;
+            mCircle.style.stroke = safe ? '#34d399' : '#fb7185';
+        }
+    }
+
+    function openModal(idx) {
+        activeCourseIndex = idx;
+        filterComp = 'ALL';
+        filterStatus = 'ALL';
+        
+        const course = apiData.courses[idx];
+        const hasTheory = course.components && course.components.some(c => c.label === 'Theory' && c.total > 0);
+        const hasLab = course.components && course.components.some(c => c.label === 'Lab' && c.total > 0);
+
+        document.getElementById('compFilterTheory').style.display = hasTheory ? '' : 'none';
+        document.getElementById('compFilterLab').style.display = hasLab ? '' : 'none';
+
+        if (!savedPlans[course.name]) savedPlans[course.name] = {};
+        if (!savedODs[course.name]) savedODs[course.name] = {};
+
+        document.getElementById('subModalTitle').innerText = course.name;
+        document.getElementById('subModalSub').innerText = `${course.present}/${course.total} logs attached`;
+
+        const mText = document.getElementById('subModalCircleText');
+        if (mText) mText.innerText = '0.0'; 
+
+        const mCircle = document.getElementById('subModalCircle');
+        if (mCircle) {
+            mCircle.style.transition = 'none';
+            mCircle.style.strokeDashoffset = '226.2';
+            void mCircle.offsetWidth;
+            mCircle.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.16,1,0.3,1), stroke 0.5s ease';
+        }
+
+        switchModalTab('history');
+        
+        const mod = document.getElementById('subjectModal');
+        const inn = document.getElementById('modalInner');
+        mod.classList.remove('hidden');
+        setTimeout(() => {
+            mod.classList.remove('opacity-0');
+            inn.classList.remove('translate-y-10');
+            updateSliderPosition(document.getElementById('compFilterAll'), 'filterCompSlider');
+            updateSliderPosition(document.getElementById('tabLogBtn'), 'modalNavSlider');
+        }, 10);
+    }
+
+    function closeModal() {
+        const mod = document.getElementById('subjectModal');
+        const inn = document.getElementById('modalInner');
+        mod.classList.add('opacity-0');
+        inn.classList.add('translate-y-10');
+        setTimeout(() => {
+            mod.classList.add('hidden');
+        }, 300);
+    }
+
+    function openCalendarModal() {
+        setCalView('week');
+        const modal = document.getElementById('calendarModal');
+        const inner = document.getElementById('calendarModalInner');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            inner.classList.remove('translate-y-10');
+            updateSliderPosition(document.getElementById('calViewWeekBtn'), 'calViewSlider');
+        }, 10);
+    }
+
+    function closeCalendarModal() {
+        const modal = document.getElementById('calendarModal');
+        const inner = document.getElementById('calendarModalInner');
+        modal.classList.add('opacity-0');
+        inner.classList.add('translate-y-10');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function setCalView(mode) {
+        calViewMode = mode;
+        const bMonth = document.getElementById('calViewMonthBtn');
+        const bWeek = document.getElementById('calViewWeekBtn');
+        const bDay = document.getElementById('calViewDayBtn');
+        const activeBtn = mode === 'month' ? bMonth : mode === 'week' ? bWeek : bDay;
+
+        updateSliderPosition(activeBtn, 'calViewSlider');
+        [bMonth, bWeek, bDay].forEach(b => {
+            b.className = b === activeBtn ? 'relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+        });
+
+        renderCalendarContent();
+    }
+
+    function changeCalPeriod(dir) {
+        if (calViewMode === 'month') {
+            calCurrentDate.setMonth(calCurrentDate.getMonth() + dir);
+        } else if (calViewMode === 'week') {
+            calCurrentDate.setDate(calCurrentDate.getDate() + (dir * 7));
+        } else if (calViewMode === 'day') {
+            calCurrentDate.setDate(calCurrentDate.getDate() + dir);
+        }
+        renderCalendarContent();
+    }
+
+    function renderCalendarContent() {
+        const bodyEl = document.getElementById('calendarViewBody');
+        const labelEl = document.getElementById('calPeriodLabel');
+        if (!bodyEl || !labelEl) return;
+
+        if (timeIndicatorInterval) clearInterval(timeIndicatorInterval);
+
+        if (calViewMode === 'month') {
+            labelEl.innerText = calCurrentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            bodyEl.innerHTML = `
+              <div class="grid grid-cols-7 border-b border-white/5 text-center py-2.5 text-[10px] font-mono text-neutral-500 uppercase tracking-widest bg-white/[0.01] flex-shrink-0">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+              </div>
+              <div id="calMonthGrid" class="grid grid-cols-7 flex-1 overflow-y-auto custom-scrollbar divide-y divide-x divide-white/[0.03]"></div>`;
+            renderMonthGrid();
+        } else if (calViewMode === 'week') {
+            const startOfWeek = new Date(calCurrentDate);
+            startOfWeek.setDate(calCurrentDate.getDate() - startOfWeek.getDay());
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            labelEl.innerText = `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            
+            bodyEl.innerHTML = `
+              <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex border-b border-white/5 bg-white/[0.01]">
+                  <div class="w-16 flex-shrink-0"></div>
+                  <div class="flex-1 grid grid-cols-7" id="calWeekHeader"></div>
+                </div>
+                <div class="flex-1 flex overflow-y-auto custom-scrollbar">
+                  <div class="w-16 border-r border-white/5 flex-shrink-0 relative" id="calTimeSlotsCol"></div>
+                  <div class="flex-1 grid grid-cols-7 relative divide-x divide-white/[0.03]" id="calWeekGrid"></div>
+                </div>
+              </div>`;
+            renderTimedGridCols(startOfWeek, 7, true);
+        } else if (calViewMode === 'day') {
+            labelEl.innerText = calCurrentDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            bodyEl.innerHTML = `
+              <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex-1 flex overflow-y-auto custom-scrollbar">
+                  <div class="w-16 border-r border-white/5 flex-shrink-0 relative" id="calTimeSlotsCol"></div>
+                  <div class="flex-1 relative" id="calDayGrid"></div>
+                </div>
+              </div>`;
+            renderTimedGridCols(calCurrentDate, 1, false);
+        }
+    }
+
+    function renderMonthGrid() {
+        const grid = document.getElementById('calMonthGrid');
+        if (!grid) return;
+
+        const year = calCurrentDate.getFullYear();
+        const month = calCurrentDate.getMonth();
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        const prevTotalDays = new Date(year, month, 0).getDate();
+        const dayNameMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        let html = '';
+        const todayStr = toLocalDateStr(new Date());
+
+        for (let i = firstDayIndex - 1; i >= 0; i--) {
+            html += `<div class="p-2 bg-black/20 opacity-30 flex flex-col justify-between"><span class="text-[10px] font-mono text-neutral-500">${prevTotalDays - i}</span></div>`;
+        }
+
+        for (let d = 1; d <= totalDays; d++) {
+            const currDateObj = new Date(year, month, d);
+            const dateKey = toLocalDateStr(currDateObj);
+            const dayOfWeekName = dayNameMap[currDateObj.getDay()];
+            const daySlots = scheduleMap[dayOfWeekName] || [];
+            const isToday = (dateKey === todayStr);
+
+            let slotsSnippet = '';
+            daySlots.slice(0, 2).forEach(slot => {
+                slotsSnippet += `<div class="${getSubjClr(slot.courseName)} rounded-md px-1.5 py-0.5 text-[9px] font-mono truncate mb-0.5 hover:brightness-125">${slot.courseName}</div>`;
+            });
+            if (daySlots.length > 2) {
+                slotsSnippet += `<span class="text-[8px] font-mono text-neutral-500">+${daySlots.length - 2} more</span>`;
+            }
+
+            html += `<div onclick="openDayDetail('${dateKey}', '${dayOfWeekName}')" class="p-2 flex flex-col justify-between cursor-pointer transition hover:bg-white/[0.04] ${isToday ? 'bg-white/[0.03]' : ''}">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-mono ${isToday ? 'w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center' : 'text-neutral-400'}">${d}</span>
+                </div>
+                <div class="mt-1 overflow-hidden">${slotsSnippet}</div>
+            </div>`;
+        }
+
+        const totalCellsSoFar = firstDayIndex + totalDays;
+        const nextDaysCount = totalCellsSoFar <= 35 ? 35 - totalCellsSoFar : 42 - totalCellsSoFar;
+        for (let nd = 1; nd <= nextDaysCount; nd++) {
+            html += `<div class="p-2 bg-black/20 opacity-30 flex flex-col justify-between"><span class="text-[10px] font-mono text-neutral-500">${nd}</span></div>`;
+        }
+
+        grid.innerHTML = html;
+    }
+
+    function renderTimedGridCols(startDate, numDays, isWeekView) {
+        const slotsCol = document.getElementById('calTimeSlotsCol');
+        const headerEl = isWeekView ? document.getElementById('calWeekHeader') : null;
+        const gridEl = isWeekView ? document.getElementById('calWeekGrid') : document.getElementById('calDayGrid');
+        if (!slotsCol || !gridEl) return;
+
+        const hourHeight = 80; 
+        const startHour = 8; 
+        const totalHours = 12; 
+        const topPadding = 20; 
+
+        let timeHtml = `<div class="relative w-full" style="min-height: ${totalHours * hourHeight + topPadding * 2}px;">`;
+        for (let h = startHour; h <= startHour + totalHours; h++) {
+            const hStr = h === 12 ? `12:00 PM` : (h < 12 ? `${h}:00 AM` : `${h - 12}:00 PM`);
+            timeHtml += `<div class="absolute w-full text-[9px] font-mono text-neutral-500 text-right pr-2" style="top: ${(h - startHour) * hourHeight + topPadding}px; transform: translateY(-50%);">${hStr}</div>`;
+        }
+        timeHtml += `</div>`;
+        slotsCol.innerHTML = timeHtml;
+
+        const dayNameMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const todayStr = toLocalDateStr(new Date());
+
+        let headerHtml = '';
+        let gridHtml = '';
+
+        for (let i = 0; i < numDays; i++) {
+            const curr = new Date(startDate);
+            curr.setDate(startDate.getDate() + i);
+            const dateKey = toLocalDateStr(curr);
+            const dayName = dayNameMap[curr.getDay()];
+            const isToday = (dateKey === todayStr);
+
+            if (headerEl) {
+                headerHtml += `<div class="text-center py-2"><span class="text-[10px] font-mono ${isToday ? 'text-emerald-400 font-bold' : 'text-neutral-400'}">${curr.toLocaleDateString('en-US', { weekday: 'short' })} ${curr.getDate()}</span></div>`;
+            }
+
+            const daySlots = scheduleMap[dayName] || [];
+            let positionedSlotsHtml = `<div class="relative w-full h-full" style="min-height: ${totalHours * hourHeight + topPadding * 2}px;">`;
+
+            for (let h = startHour; h <= startHour + totalHours; h++) {
+                positionedSlotsHtml += `<div class="absolute left-0 right-0 border-t border-white/5" style="top: ${(h - startHour) * hourHeight + topPadding}px;"></div>`;
+            }
+
+            daySlots.forEach(slot => {
+                if (!slot.startObj || !slot.endObj) return;
+                const startH = slot.startObj.getHours() + slot.startObj.getMinutes() / 60;
+                const endH = slot.endObj.getHours() + slot.endObj.getMinutes() / 60;
+                
+                const topPx = Math.max(0, (startH - startHour) * hourHeight) + topPadding;
+                const heightPx = Math.max(30, (endH - startH) * hourHeight);
+
+                const encodedData = encodeURIComponent(JSON.stringify({
+                    name: slot.courseName,
+                    type: slot.type,
+                    time: slot.timeRange,
+                    venue: slot.venue || 'Classroom',
+                    faculty: slot.faculty || 'Faculty assigned'
+                }));
+
+                positionedSlotsHtml += `
+                <div onclick="openClassDetail('${encodedData}')" class="absolute left-1 right-1 z-10 ${getSubjClr(slot.courseName)} rounded-xl p-2 overflow-hidden transition-all shadow-sm cursor-pointer click-pop hover:brightness-125" style="top: ${topPx}px; height: ${heightPx}px;">
+                    <p class="font-medium text-[11px] truncate leading-tight">${slot.courseName}</p>
+                    <p class="text-[9px] font-mono opacity-60 mt-1">${slot.timeRange}</p>
+                </div>`;
+            });
+
+            if (isToday) {
+                positionedSlotsHtml += `<div id="liveTimeIndicator" class="absolute left-0 right-0 z-20 flex items-center pointer-events-none" style="display: none; transform: translateY(-50%);">
+                    <div class="w-2 h-2 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,1)] -ml-1"></div>
+                    <div class="flex-1 h-[2px] bg-white shadow-[0_0_12px_rgba(255,255,255,1)] opacity-90"></div>
+                </div>`;
+            }
+
+            positionedSlotsHtml += `</div>`;
+            gridHtml += `<div class="relative ${isToday ? 'bg-white/[0.02]' : ''}" id="colContainer_${i}">${positionedSlotsHtml}</div>`;
+        }
+
+        if (headerEl) headerEl.innerHTML = headerHtml;
+        gridEl.innerHTML = gridHtml;
+
+        updateTimeIndicator(startDate, numDays, hourHeight, startHour, topPadding);
+        timeIndicatorInterval = setInterval(() => {
+            updateTimeIndicator(startDate, numDays, hourHeight, startHour, topPadding);
+        }, 30000);
+    }
+
+    function updateTimeIndicator(startDate, numDays, hourHeight, startHour, topPadding) {
+        const now = new Date();
+        const currentH = now.getHours() + now.getMinutes() / 60;
+        
+        const ind = document.getElementById('liveTimeIndicator');
+        if (!ind) return;
+
+        if (currentH < startHour || currentH > startHour + 12) {
+            ind.style.display = 'none';
+            return;
+        }
+
+        const todayStr = toLocalDateStr(now);
+        for (let i = 0; i < numDays; i++) {
+            const curr = new Date(startDate);
+            curr.setDate(startDate.getDate() + i);
+            if (toLocalDateStr(curr) === todayStr) {
+                const topPx = (currentH - startHour) * hourHeight + topPadding;
+                ind.style.top = `${topPx}px`;
+                ind.style.display = 'flex';
+                break;
+            }
+        }
+    }
+
+    function openClassDetail(encodedJson) {
+        const data = JSON.parse(decodeURIComponent(encodedJson));
+        document.getElementById('classDetailType').innerText = data.type;
+        document.getElementById('classDetailName').innerText = data.name;
+        document.getElementById('classDetailTime').innerText = data.time;
+        document.getElementById('classDetailVenue').innerText = data.venue;
+        document.getElementById('classDetailFaculty').innerText = data.faculty;
+
+        const modal = document.getElementById('classDetailModal');
+        const inner = document.getElementById('classDetailInner');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            inner.classList.remove('translate-y-10');
+        }, 10);
+    }
+
+    function closeClassDetailModal() {
+        const modal = document.getElementById('classDetailModal');
+        const inner = document.getElementById('classDetailInner');
+        modal.classList.add('opacity-0');
+        inner.classList.add('translate-y-10');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+
+    function openDayDetail(dateStr, dayName) {
+        const modal = document.getElementById('dayDetailModal');
+        const inner = document.getElementById('dayDetailInner');
+        const title = document.getElementById('dayDetailTitle');
+        const content = document.getElementById('dayDetailContent');
+
+        const dObj = new Date(dateStr.replace(' ', 'T'));
+        title.innerText = `${dObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} (${dayName})`;
+
+        const slots = scheduleMap[dayName] || [];
+        let html = '';
+
+        if (slots.length === 0) {
+            html = `<p class="text-xs text-neutral-500 text-center py-6 font-mono">No classes scheduled.</p>`;
+        } else {
+            slots.forEach(slot => {
+                const encodedData = encodeURIComponent(JSON.stringify({
+                    name: slot.courseName,
+                    type: slot.type,
+                    time: slot.timeRange,
+                    venue: slot.venue || 'Classroom',
+                    faculty: slot.faculty || 'Faculty assigned'
+                }));
+
+                html += `
+                <div onclick="closeDayDetailModal(); openClassDetail('${encodedData}')" class="${getSubjClr(slot.courseName)} rounded-2xl p-3 flex items-center justify-between gap-3 cursor-pointer transition hover:brightness-125">
+                    <div class="min-w-0">
+                        <p class="font-medium text-xs truncate">${slot.courseName}</p>
+                        <p class="text-[9px] font-mono opacity-60 mt-0.5">${slot.type} // ${slot.venue || '--'}</p>
+                    </div>
+                    <span class="text-[10px] font-mono opacity-75 whitespace-nowrap">${slot.timeRange}</span>
+                </div>`;
+            });
+        }
+
+        content.innerHTML = html;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            inner.classList.remove('translate-y-10');
+        }, 10);
+    }
+
+    function closeDayDetailModal() {
+        const modal = document.getElementById('dayDetailModal');
+        const inner = document.getElementById('dayDetailInner');
+        modal.classList.add('opacity-0');
+        inner.classList.add('translate-y-10');
+        setTimeout(() => { modal.classList.add('hidden'); }, 300);
+    }
+
+    function switchModalTab(tabName) {
+        activeModalTab = tabName;
+        const tLog = document.getElementById('tabLogBtn');
+        const tSch = document.getElementById('tabSchedBtn');
+        const barF1 = document.getElementById('historyFilterBar');
+        const barF2 = document.getElementById('odSimulatorBar');
+        const barUp = document.getElementById('upcomingSimulatorBar');
+
+        const activeBtn = tabName === 'history' ? tLog : tSch;
+        updateSliderPosition(activeBtn, 'modalNavSlider');
+
+        [tLog, tSch].forEach(b => {
+            b.className = b === activeBtn ? 'relative z-10 flex-1 py-3 rounded-full text-xs font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 flex-1 py-3 rounded-full text-xs text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+        });
+
+        if (tabName === 'history') {
+            barF1.classList.remove('hidden');
+            barF2.classList.remove('hidden');
+            barUp.classList.add('hidden');
+            renderModalHistory();
+        } else {
+            barF1.classList.add('hidden');
+            barF2.classList.add('hidden');
+            barUp.classList.remove('hidden');
+            renderModalUpcoming();
+        }
+    }
+
+    function setFilter(type, val) {
+        if (type === 'comp') {
+            filterComp = val;
+            const btn = val === 'ALL' ? document.getElementById('compFilterAll') : val === 'Theory' ? document.getElementById('compFilterTheory') : document.getElementById('compFilterLab');
+            updateSliderPosition(btn, 'filterCompSlider');
+            ['compFilterAll', 'compFilterTheory', 'compFilterLab'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.className = b === btn ? 'relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+                }
+            });
+        }
+        if (type === 'status') {
+            if (filterStatus === val) filterStatus = 'ALL';
+            else filterStatus = val;
+            const btn = filterStatus === 'PRESENT' ? document.getElementById('statusFilterPresent') : filterStatus === 'ABSENT' ? document.getElementById('statusFilterAbsent') : filterStatus === 'NOT_MARKED' ? document.getElementById('statusFilterNotMarked') : null;
+            if (btn) {
+                updateSliderPosition(btn, 'filterStatusSlider');
+            } else {
+                document.getElementById('filterStatusSlider').style.width = '0px';
+            }
+            ['statusFilterPresent', 'statusFilterAbsent', 'statusFilterNotMarked'].forEach(id => {
+                const b = document.getElementById(id);
+                if (b) {
+                    b.className = b === btn ? 'relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
+                }
+            });
+        }
+        renderModalHistory();
+    }
+
+    function toggleOD(idx) {
+        const cName = apiData.courses[activeCourseIndex].name;
+        if (!savedODs[cName]) savedODs[cName] = {};
+        if (savedODs[cName][idx]) delete savedODs[cName][idx];
+        else savedODs[cName][idx] = true;
+        
+        syncToDB();
+        triggerFlash('odSimStats');
+        renderModalHistory();
+        updateOverallCard();
+        updateSingleCourseCard(activeCourseIndex);
+    }
+
+    function resetModalODs() {
+        const cName = apiData.courses[activeCourseIndex].name;
+        savedODs[cName] = {};
+        syncToDB();
+        renderModalHistory();
+        updateOverallCard();
+        updateSingleCourseCard(activeCourseIndex);
+    }
+
+    function renderModalHistory() {
+        const listEl = document.getElementById('subModalContentList');
+        if(!listEl) return;
+        let htmlBuilder = '';
+
+        const course = apiData.courses[activeCourseIndex];
+        const ods = savedODs[course.name] || {};
+        let odCount = Object.values(ods).filter(Boolean).length;
+
+        let effectivePresent = course.present + odCount;
+        let effectiveTotal = course.total;
+
+        if (filterComp !== 'ALL' && course.components) {
+            const matchComp = course.components.find(c => c.label.toLowerCase() === filterComp.toLowerCase());
+            if (matchComp) {
+                effectivePresent = matchComp.simPresent !== undefined ? matchComp.simPresent : matchComp.present;
+                effectiveTotal = matchComp.simTotal !== undefined ? matchComp.simTotal : matchComp.total;
+            }
+        }
+
+        const stats = calcAttendanceMath(effectivePresent, effectiveTotal);
+
+        document.getElementById('odSimStats').innerText = `${effectivePresent}/${effectiveTotal} logs active`;
+        document.getElementById('odSimStatusText').innerText = stats.status;
+        
+        updateModalGraph(stats.pct, stats.safe);
+
+        const badge = document.getElementById('subModalTypeBadge');
+        if(badge) {
+            badge.innerText = `${filterComp.toUpperCase()} · ${stats.safe ? 'ON TRACK' : 'AT RISK'}`;
+            badge.className = `txt-micro px-3 py-1 rounded-full border ${stats.safe ? 'border-emerald-500/50 text-emerald-400' : 'border-rose-500/50 text-rose-400'}`;
+        }
+
+        const history = course.history || [];
+        let lastDate = null;
+        let countShown = 0;
+
+        history.forEach((log, idx) => {
+            const dateStr = (log.start || '').split(' ')[0];
+            const passComp = (filterComp === 'ALL' || log.comp.toLowerCase() === filterComp.toLowerCase());
+            
+            const rawStatus = (log.status || '').toUpperCase();
+            let isLogUnmarked = (rawStatus === 'NOT_MARKED' || rawStatus === 'UNMARKED' || rawStatus === 'PENDING');
+            let isLogPresent = (rawStatus === 'PRESENT' || rawStatus === 'P');
+            let isLogAbsent = (rawStatus === 'ABSENT' || rawStatus === 'A');
+
+            let passStatus = false;
+            if (filterStatus === 'ALL') passStatus = true;
+            else if (filterStatus === 'PRESENT') passStatus = isLogPresent;
+            else if (filterStatus === 'ABSENT') passStatus = isLogAbsent;
+            else if (filterStatus === 'NOT_MARKED') passStatus = isLogUnmarked;
+            
+            if (!passComp || !passStatus) return;
+            countShown++;
+
+            if (dateStr !== lastDate) {
+                lastDate = dateStr;
+                htmlBuilder += `<div class="pt-4 pb-2 px-1"><span class="txt-micro text-neutral-500">${formatDateString(log.start)}</span></div>`;
+            }
+
+            const isOD = !!ods[idx];
+            let statusText = formatStatus(log.status);
+            
+            let dotClass = 'bg-transparent border border-rose-500/50';
+            let badgeClass = 'text-rose-400 bg-rose-500/10';
+            let actionBtn = '';
+
+            if (isLogPresent) {
+                dotClass = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]';
+                badgeClass = 'text-emerald-400 bg-emerald-500/10';
+            } else if (isLogUnmarked) {
+                dotClass = 'bg-neutral-500 border border-neutral-600';
+                badgeClass = 'text-neutral-400 bg-neutral-500/10 border border-white/5';
+                statusText = 'Not Marked';
+            } else {
+                if (isOD) {
+                    statusText = 'Claimed OD';
+                    dotClass = 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.3)]';
+                    badgeClass = 'text-amber-400 bg-amber-500/10';
+                    actionBtn = `<button type="button" onclick="toggleOD(${idx})" class="txt-micro ml-auto text-neutral-400 border border-neutral-700 px-3 py-1.5 rounded hover:bg-white/5 transition click-pop">Undo</button>`;
+                } else {
+                    actionBtn = `<button type="button" onclick="toggleOD(${idx})" class="btn-clean px-4 py-1.5 text-[10px] click-pop">Claim OD</button>`;
+                }
+            }
+
+            const compLabel = log.comp === 'Lab' ? 'Lab' : 'Theory';
+
+            htmlBuilder += `
+            <div class="bg-white/5 rounded-2xl p-4 flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotClass}"></div>
+                    <div class="min-w-0 flex items-center gap-2">
+                        <span class="text-[9px] font-mono text-neutral-500">${formatTimeString(log.start)}</span>
+                        <span class="txt-micro px-3 py-1 rounded-full ${badgeClass}">${statusText}</span>
+                        <span class="text-[9px] font-mono text-neutral-600">${compLabel}</span>
+                    </div>
+                </div>
+                <div class="ml-auto flex items-center">${actionBtn}</div>
+            </div>`;
+        });
+
+        if (countShown === 0) {
+            listEl.innerHTML = `<p class="text-xs text-neutral-500 text-center py-8 font-mono">Void.</p>`;
+        } else {
+            listEl.innerHTML = htmlBuilder;
+        }
+    }
+
+    function toggleUpcomingPlan(idx, decision) {
+        const cName = apiData.courses[activeCourseIndex].name;
+        if (!savedPlans[cName]) savedPlans[cName] = {};
+        if (savedPlans[cName][idx] === decision) delete savedPlans[cName][idx];
+        else savedPlans[cName][idx] = decision;
+
+        syncToDB();
+        triggerFlash('projStats');
+        renderModalUpcoming();
+        updateOverallCard();
+        updateSingleCourseCard(activeCourseIndex);
+    }
+
+    function resetModalUpcoming() {
+        const cName = apiData.courses[activeCourseIndex].name;
+        savedPlans[cName] = {};
+        syncToDB();
+        renderModalUpcoming();
+        updateOverallCard();
+        updateSingleCourseCard(activeCourseIndex);
+    }
+
+    function renderModalUpcoming() {
+        const listEl = document.getElementById('subModalContentList');
+        if(!listEl) return;
+        let htmlBuilder = '';
+
+        const course = apiData.courses[activeCourseIndex];
+        const slots = course.scheduled || [];
+        const plan = savedPlans[course.name] || {};
+        
+        let pAdded = 0, tAdded = 0;
+        for (const k in plan) {
+            if (plan[k] === 'attend') { pAdded++; tAdded++; }
+            else if (plan[k] === 'bunk') { tAdded++; }
+        }
+
+        const projP = course.present + pAdded;
+        const projT = course.total + tAdded;
+        const stats = calcAttendanceMath(projP, projT);
+
+        document.getElementById('projStats').innerText = `${projP}/${projT}`;
+        document.getElementById('projStatusText').innerText = stats.status;
+        
+        updateModalGraph(stats.pct, stats.safe);
+
+        const badge = document.getElementById('subModalTypeBadge');
+        if(badge) {
+            badge.innerText = stats.safe ? 'ON TRACK' : 'AT RISK';
+            badge.className = `txt-micro px-3 py-1 rounded-full border ${stats.safe ? 'border-emerald-500/50 text-emerald-400' : 'border-rose-500/50 text-rose-400'}`;
+        }
+
+        const nowIso = new Date().toISOString().replace('T', ' ').split('.')[0];
+
+        slots.forEach((slot, idx) => {
+            if (slot.start <= nowIso) return;
+
+            const dec = plan[idx];
+            const btnAtt = dec === 'attend' ? 'btn-anim-base btn-active-attend' : 'btn-anim-base btn-attend';
+            const btnBnk = dec === 'bunk' ? 'btn-anim-base btn-active-bunk' : 'btn-anim-base btn-bunk';
+            const compLabel = slot.type === 'Lab' ? 'Lab' : 'Theory';
+
+            htmlBuilder += `
+            <div class="bg-white/5 rounded-2xl p-4 flex items-center justify-between gap-2 mb-2">
+                <div class="flex-1 min-w-0">
+                    <span class="text-[11px] text-white block mb-0.5">${formatDateString(slot.start)}</span>
+                    <span class="text-[9px] font-mono text-neutral-500">${formatTimeString(slot.start)} // ${compLabel}</span>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="toggleUpcomingPlan(${idx},'bunk')" class="${btnBnk} px-4 py-1.5 text-[10px]">Bunk</button>
+                    <button type="button" onclick="toggleUpcomingPlan(${idx},'attend')" class="${btnAtt} px-4 py-1.5 text-[10px]">Attend</button>
+                </div>
+            </div>`;
+        });
+
+        if (htmlBuilder === '') {
+            listEl.innerHTML = `<p class="text-xs text-neutral-500 text-center py-8 font-mono">Void.</p>`;
+        } else {
+            listEl.innerHTML = htmlBuilder;
+        }
+    }
+
+    function buildScheduleMap() {
+        scheduleMap = { 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [] };
+        if (!apiData || !apiData.timetable) return;
+
+        const daysArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        apiData.timetable.forEach(slot => {
+            const st = parseSafeDate(slot.start);
+            if (!st) return;
+
+            const dName = daysArr[st.getDay()];
+            if (!scheduleMap[dName]) return;
+
+            const tRange = `${formatTimeString(slot.start)} – ${formatTimeString(slot.end)}`;
+            const sKey = st.getHours() * 60 + st.getMinutes();
+
+            const exists = scheduleMap[dName].find(s => s.timeRange === tRange && s.courseName === slot.courseName);
+            if (!exists) {
+                scheduleMap[dName].push({
+                    courseName: slot.courseName,
+                    type: slot.type,
+                    venue: slot.venue,
+                    faculty: slot.faculty || '',
+                    timeRange: tRange,
+                    sortKey: sKey,
+                    startObj: st,
+                    endObj: parseSafeDate(slot.end)
+                });
+            }
+        });
+
+        for (let d in scheduleMap) {
+            scheduleMap[d].sort((a, b) => a.sortKey - b.sortKey);
+        }
+    }
+
+    function renderTimetableTabs() {
+        const tabsEl = document.getElementById('ttDayTabsContainer');
+        if(!tabsEl) return;
+        
+        let slider = document.getElementById('ttSlider');
+        if (!slider) {
+            slider = document.createElement('div');
+            slider.id = 'ttSlider';
+            slider.className = 'absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none';
+            tabsEl.appendChild(slider);
+        }
+
+        const dList = ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const todayName = fullDays[new Date().getDay()];
+
+        if (!activeDay) activeDay = dList.includes(todayName) ? todayName : 'Tuesday';
+
+        Array.from(tabsEl.children).forEach(child => {
+            if (child !== slider) child.remove();
+        });
+
+        let activeBtnEl = null;
+
+        dList.forEach(day => {
+            const isSel = (day === activeDay);
+            const isToday = (day === todayName);
+            const short = day.substring(0, 3).toUpperCase();
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = `${short} ${isToday ? '<span class="inline-block w-1.5 h-1.5 bg-emerald-400 rounded-full ml-1 align-middle shadow-[0_0_6px_rgba(52,211,153,0.8)]"></span>' : ''}`;
+            btn.className = `relative z-10 px-5 py-2 rounded-full text-[10px] font-mono transition-colors duration-300 click-pop ${isSel ? 'font-bold text-black' : 'text-neutral-500 hover:text-white'}`;
+            btn.onclick = () => switchTimetableDay(day);
+            tabsEl.appendChild(btn);
+
+            if (isSel) activeBtnEl = btn;
+        });
+
+        if (activeBtnEl) {
+            updateSliderPosition(activeBtnEl, 'ttSlider');
+        }
+
+        renderTimetableSlots(activeDay);
+    }
+
+    function switchTimetableDay(day) {
+        activeDay = day;
+        renderTimetableTabs();
+    }
+
+    function renderTimetableSlots(day) {
+        const listEl = document.getElementById('ttSlotList');
+        if(!listEl) return;
+        let htmlBuilder = '';
+
+        const slots = scheduleMap[day] || [];
+        const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const todayName = fullDays[new Date().getDay()];
+        const isToday = (day === todayName);
+        const now = new Date();
+
+        if (slots.length === 0) {
+            listEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">No structure detected.</div>`;
+            return;
+        }
+
+        slots.forEach(slot => {
+            let isCurrentLiveSlot = false;
+            if (isToday && slot.startObj && slot.endObj && now >= slot.startObj && now <= slot.endObj) {
+                isCurrentLiveSlot = true;
+            }
+
+            const liveIndicator = isCurrentLiveSlot ? `<div class="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>` : '';
+            const encodedData = encodeURIComponent(JSON.stringify({
+                name: slot.courseName,
+                type: slot.type,
+                time: slot.timeRange,
+                venue: slot.venue || 'Classroom',
+                faculty: slot.faculty || 'Faculty assigned'
+            }));
+
+            htmlBuilder += `
+            <div onclick="openClassDetail('${encodedData}')" class="glass p-5 relative overflow-hidden flex items-center justify-between gap-4 cursor-pointer click-pop ${isCurrentLiveSlot ? 'border-white/40 bg-white/[0.02]' : ''}">
+                ${liveIndicator}
+                <div class="flex-1 min-w-0 pl-2">
+                    <p class="font-medium text-sm text-white mb-1 truncate">${slot.courseName}</p>
+                    <p class="text-[10px] font-mono text-neutral-500">${slot.type === 'Lab' ? 'Lab' : 'Theory'} // ${slot.venue || '--'}</p>
+                </div>
+                <span class="text-[10px] font-mono text-neutral-400 bg-white/5 px-3 py-1.5 rounded-full whitespace-nowrap">${slot.timeRange}</span>
+            </div>`;
+        });
+
+        listEl.innerHTML = htmlBuilder;
+    }
+
+    function renderTimeline() {
+        const listEl = document.getElementById('globalLogsList');
+        if(!listEl) return;
+        let htmlBuilder = '';
+        if (!apiData || !apiData.courses) return;
+
+        let flatLogs = [];
+        apiData.courses.forEach(c => {
+            if (c.history) {
+                c.history.forEach(h => {
+                    flatLogs.push({ course: c.name, start: h.start, end: h.end, status: h.status });
+                });
+            }
+        });
+
+        flatLogs.sort((a, b) => b.start.localeCompare(a.start));
+
+        if (flatLogs.length === 0) {
+            listEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">Void.</div>`;
+            return;
+        }
+
+        let lastDate = null;
+        flatLogs.forEach(log => {
+            const dateStr = log.start.split(' ')[0];
+            if (dateStr !== lastDate) {
+                lastDate = dateStr;
+                htmlBuilder += `<div class="pt-6 pb-2"><span class="txt-micro text-neutral-500">${formatDateString(log.start)}</span></div>`;
+            }
+
+            const raw = (log.status || '').toUpperCase();
+            let isLogUnmarked = (raw === 'NOT_MARKED' || raw === 'UNMARKED' || raw === 'PENDING');
+            let isLogPresent = (raw === 'PRESENT' || raw === 'P');
+
+            let dotCls = 'bg-transparent border border-rose-500/50';
+            let bdgCls = 'text-rose-400 bg-rose-500/10';
+
+            if (isLogPresent) {
+                dotCls = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]';
+                bdgCls = 'text-emerald-400 bg-emerald-500/10';
+            } else if (isLogUnmarked) {
+                dotCls = 'bg-neutral-500 border border-neutral-600';
+                bdgCls = 'text-neutral-400 bg-neutral-500/10 border border-white/5';
+            }
+            
+            const statusFull = formatStatus(log.status);
+
+            htmlBuilder += `
+            <div class="glass p-4 flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div class="w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotCls}"></div>
+                    <div class="min-w-0">
+                        <p class="font-medium text-xs text-white truncate">${log.course}</p>
+                        <p class="text-[9px] font-mono text-neutral-500 mt-0.5">${formatTimeString(log.start)}</p>
+                    </div>
+                </div>
+                <span class="txt-micro px-3 py-1 rounded-full ${bdgCls}">${statusFull}</span>
+            </div>`;
+        });
+
+        listEl.innerHTML = htmlBuilder;
+    }
+
+    function updateLiveTracker() {
+        if (!apiData || !apiData.timetable) return;
+
+        const now = new Date();
+        const dateStr = toLocalDateStr(now);
+        const container = document.getElementById('liveStatusContainer');
+        const badge = document.getElementById('liveBadge');
+        const cDown = document.getElementById('liveCountdown');
+        const cName = document.getElementById('liveCourseName');
+        const cMeta = document.getElementById('liveCourseMeta');
+        const cTime = document.getElementById('liveTimeBadge');
+
+        if(!container) return;
+
+        let live = null;
+        for (const slot of apiData.timetable) {
+            const st = parseSafeDate(slot.start);
+            const et = parseSafeDate(slot.end);
+            if (st && et && now >= st && now <= et) {
+                live = { ...slot, sTime: st, eTime: et };
+                break;
+            }
+        }
+
+        let next = null;
+        const todaySlots = apiData.timetable
+            .map(s => ({ ...s, sTime: parseSafeDate(s.start), eTime: parseSafeDate(s.end) }))
+            .filter(s => s.sTime && s.eTime && toLocalDateStr(s.sTime) === dateStr)
+            .sort((a, b) => a.sTime - b.sTime);
+
+        for (const slot of todaySlots) {
+            if (slot.sTime > now) {
+                next = slot;
+                break;
+            }
+        }
+
+        if (!next) {
+            const future = apiData.timetable
+                .map(s => ({ ...s, sTime: parseSafeDate(s.start), eTime: parseSafeDate(s.end) }))
+                .filter(s => s.sTime && s.eTime && s.sTime > now)
+                .sort((a, b) => a.sTime - b.sTime);
+            if (future.length > 0) next = future[0];
+        }
+
+        if (live) {
+            container.classList.remove('hidden');
+            badge.innerText = 'Current Class';
+            const mins = Math.max(0, Math.round((live.eTime - now) / 60000));
+            cDown.innerText = mins > 0 ? `${mins}m remaining` : 'Ending';
+            cName.innerText = live.courseName;
+            cMeta.innerText = live.venue || 'Room';
+            cTime.innerText = `${formatTimeString(live.start)} – ${formatTimeString(live.end)}`;
+        } else if (next) {
+            container.classList.remove('hidden');
+            badge.innerText = 'Next Class';
+            const diffMins = Math.max(0, Math.round((next.sTime - now) / 60000));
+            let timeAwayStr = '';
+            if (diffMins < 60) {
+                timeAwayStr = `in ${diffMins}m`;
+            } else {
+                const hrs = Math.floor(diffMins / 60);
+                const remMins = diffMins % 60;
+                timeAwayStr = `in ${hrs}h ${remMins}m`;
+            }
+            cDown.innerText = timeAwayStr;
+            cName.innerText = next.courseName;
+            cMeta.innerText = next.venue || 'Room';
+            cTime.innerText = `${formatTimeString(next.start)} – ${formatTimeString(next.end)}`;
+        } else {
+            container.classList.add('hidden');
+        }
+
+        if (currentMainView === 'timetable') {
+            renderTimetableSlots(activeDay);
+        }
+    }
+  </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
