@@ -1,15 +1,8 @@
-import base64
-import json
-import requests
-import re
-import sqlite3
-import os
 import uvicorn
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 app = FastAPI()
 
@@ -21,453 +14,274 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-a = os.environ.get("DB_PATH", ".campus_portal.db")
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
-def init_db():
-    b = sqlite3.connect(a)
-    b.execute("PRAGMA journal_mode=WAL")
-    b.execute("PRAGMA synchronous=NORMAL")
-    c = b.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS user_data (user_id TEXT PRIMARY KEY, plan_json TEXT, od_json TEXT)")
-    b.commit()
-    b.close()
+@app.post("/api/login")
+async def mock_login(credentials: LoginRequest):
+    if credentials.email == "demo@student.edu" and credentials.password == "demo123":
+        return {"access_token": "mock_demo_token_789", "token_type": "bearer"}
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
-init_db()
-
-class AuthRequest(BaseModel):
-    token: str
-    user_id: str = ""
-    user_name: str = ""
-
-class BreakdownRequest(BaseModel):
-    token: str
-    user_id: str
-    exam_id: str
-    term_course_id: str
-
-class SaveRequest(BaseModel):
-    token: str
-    user_id: str = ""
-    plan_json: str
-    od_json: str
-
-def calc_margin(a, b):
-    if b <= 0:
-        return {"pct": 0.0, "status": "No classes", "safe": True, "margin": 0}
-    c = round((a / b) * 100, 1)
-    if c >= 75.0:
-        d = int((a - 0.75 * b) // 0.75)
-        e = "es"
-        if d == 1:
-            e = ""
-        return {"pct": c, "status": f"Can bunk {max(0, d)} class{e}", "safe": True, "margin": max(0, d)}
-    f = int(((0.75 * b) - a) // 0.25) + 1
-    g = "es"
-    if f == 1:
-        g = ""
-    return {"pct": c, "status": f"Need {f} class{g} for 75%", "safe": False, "margin": 0}
-
-def get_user_id(a, b, c, d):
-    e = None
-    try:
-        f = a.split(".")
-        if len(f) >= 2:
-            g = f[1] + "=" * ((4 - len(f[1]) % 4) % 4)
-            h = json.loads(base64.urlsafe_b64decode(g))
-            e = str(h.get("userId") or h.get("sub") or h.get("id") or h.get("ukid") or "")
-    except Exception:
-        pass
-    if not e:
-        try:
-            i = requests.get(f"{d}/rest/personalDetails", headers=b, cookies=c, timeout=5)
-            if i.status_code == 200:
-                e = str(i.json().get("id") or "")
-        except Exception:
-            pass
-    if e:
-        j = re.search(r'\d+', e)
-        if j:
-            return j.group(0)
-    return ""
-
-def parse_sem_name(a, b):
-    if not a:
-        return f"Semester {b}"
-    c = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8}
-    d = re.search(r'\bSEM\s+([IVXLCDM]+)\b', a.upper())
-    if d and d.group(1) in c:
-        return f"Semester {c[d.group(1)]}"
-    e = re.search(r'\bSEM(?:ESTER)?\s*(\d+)\b', a.upper())
-    if e:
-        return f"Semester {e.group(1)}"
-    return f"Semester {b}"
-
-@app.post("/api/attendance")
-def fetch_data(a: AuthRequest):
-    b = a.token.strip().strip('"').strip("'")
-    if b.lower().startswith("bearer "):
-        b = b[7:].strip()
-    if not b:
-        raise HTTPException(status_code=400, detail="Token required")
+def generate_dynamic_timetable():
+    now = datetime.now()
+    start_of_week = now - timedelta(days=now.weekday())
     
-    c = "https://rajalakshmi.digiicampus.com"
-    d = {"auth-token": b, "Authorization": f"Bearer {b}", "User-Agent": "Mozilla/5.0", "Accept": "application/json", "Origin": c, "Referer": f"{c}/"}
-    e = {"user": b}
+    # Realistic varied schedule from 8:30 AM to 4:45 PM with lunch breaks
+    weekly_schedule = {
+        0: [ # Monday
+            {"c": "Data Privacy and Security", "s": "08:30:00", "e": "10:30:00", "t": "Theory", "v": "Room 301", "f": "Dr. Alan"},
+            {"c": "Generative AI", "s": "10:45:00", "e": "11:45:00", "t": "Theory", "v": "Room 205", "f": "Dr. Lovelace"},
+            {"c": "Framework for Data and Visual Analytics", "s": "12:30:00", "e": "14:30:00", "t": "Lab", "v": "Data Lab 1", "f": "Dr. Smith"},
+            {"c": "Problem Solving Techniques", "s": "14:45:00", "e": "16:45:00", "t": "Theory", "v": "Seminar Hall", "f": "Prof. Kumar"}
+        ],
+        1: [ # Tuesday
+            {"c": "Generative AI", "s": "08:30:00", "e": "10:30:00", "t": "Lab", "v": "AI Lab 1", "f": "Dr. Lovelace"},
+            {"c": "Data Privacy and Security", "s": "10:45:00", "e": "11:45:00", "t": "Theory", "v": "Room 301", "f": "Dr. Alan"},
+            {"c": "Design Thinking and Innovation", "s": "12:30:00", "e": "15:30:00", "t": "Lab", "v": "Innovation Lab", "f": "Prof. Kumar"}
+        ],
+        2: [ # Wednesday
+            {"c": "Framework for Data and Visual Analytics", "s": "09:00:00", "e": "10:00:00", "t": "Theory", "v": "Room 301", "f": "Dr. Smith"},
+            {"c": "Data Privacy and Security", "s": "10:15:00", "e": "12:15:00", "t": "Lab", "v": "Cyber Lab", "f": "Dr. Alan"},
+            {"c": "Generative AI", "s": "13:30:00", "e": "14:30:00", "t": "Theory", "v": "Room 205", "f": "Dr. Lovelace"}
+        ],
+        3: [ # Thursday
+            {"c": "Problem Solving Techniques", "s": "08:30:00", "e": "09:30:00", "t": "Theory", "v": "Room 304", "f": "Prof. Kumar"},
+            {"c": "Framework for Data and Visual Analytics", "s": "09:30:00", "e": "11:30:00", "t": "Theory", "v": "Room 301", "f": "Dr. Smith"},
+            {"c": "Design Thinking and Innovation", "s": "12:30:00", "e": "13:30:00", "t": "Theory", "v": "Room 304", "f": "Prof. Kumar"},
+            {"c": "Internship Tracking", "s": "13:45:00", "e": "15:45:00", "t": "Theory", "v": "Seminar Hall", "f": "Placement Cell"}
+        ],
+        4: [ # Friday
+            {"c": "Data Privacy and Security", "s": "08:30:00", "e": "09:30:00", "t": "Theory", "v": "Room 301", "f": "Dr. Alan"},
+            {"c": "Generative AI", "s": "09:30:00", "e": "10:30:00", "t": "Theory", "v": "Room 205", "f": "Dr. Lovelace"},
+            {"c": "Framework for Data and Visual Analytics", "s": "10:45:00", "e": "12:45:00", "t": "Lab", "v": "Data Lab 1", "f": "Dr. Smith"}
+        ]
+    }
     
-    f = a.user_id
-    if not f:
-        f = get_user_id(b, d, e, c)
-    g = a.user_name
-    if not g:
-        g = "Student"
-    h = "46"
+    timetable = []
+    # Weekdays
+    for i in range(5):
+        day = start_of_week + timedelta(days=i)
+        date_str = day.strftime("%Y-%m-%d")
+        for cls in weekly_schedule[i]:
+            timetable.append({
+                "courseName": cls["c"],
+                "start": f"{date_str} {cls['s']}",
+                "end": f"{date_str} {cls['e']}",
+                "type": cls["t"],
+                "venue": cls["v"],
+                "faculty": cls["f"]
+            })
     
-    if not f:
-        raise HTTPException(status_code=400, detail="Failed to resolve User ID")
-
-    i = {}
-    try:
-        j = requests.get(f"{c}/rest/users/{f}/profile/personalDetails", headers=d, cookies=e, timeout=5)
-        if j.status_code == 200:
-            i = j.json()
-            g = i.get("fullName") or g
-    except Exception:
-        pass
-
-    try:
-        k = requests.get(f"{c}/rest/programmeBatchTerms?batch=active", headers=d, cookies=e, timeout=5)
-        if k.status_code == 200:
-            l = k.json()
-            m = []
-            if isinstance(l, list):
-                m = l
-            else:
-                m = l.get("terms", [])
-            if m and isinstance(m[0], dict) and "id" in m[0]:
-                h = str(m[0]["id"])
-    except Exception:
-        pass
-
-    n = {}
-    try:
-        o = requests.get(f"{c}/api/attendance/student/{f}/term/{h}", headers=d, cookies=e, timeout=10)
-        if o.status_code == 200:
-            n = o.json()
-        elif o.status_code == 401:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except Exception:
-        raise HTTPException(status_code=500, detail="Network error")
-
-    p = []
-    q = {}
-    try:
-        r = requests.get(f"{c}/rest/classes/v2/", headers=d, cookies=e, timeout=10)
-        if r.status_code == 200:
-            s = r.json()
-            t = []
-            if isinstance(s, list):
-                t = s
-            else:
-                t = s.get("classes") or []
-            for u in t:
-                v = str(u.get("classId") or "")
-                w = (u.get("name") or u.get("subjectName") or u.get("courseName") or "").replace('\xa0', ' ').strip()
-                if v:
-                    p.append(v)
-                    q[v] = w
-    except Exception:
-        pass
-
-    x = []
-    if p:
-        try:
-            y = []
-            for z in p:
-                y.append(("classIds", z))
-            aa = datetime.now()
-            y.append(("from", (aa - timedelta(days=45)).strftime("%Y-%m-%d 05:30:00")))
-            y.append(("to", (aa + timedelta(days=120)).strftime("%Y-%m-%d 05:30:00")))
-            ab = requests.get(f"{c}/rest/classes/v2/lessons", headers=d, cookies=e, params=y, timeout=15)
-            if ab.status_code == 200:
-                ac = ab.json()
-                if isinstance(ac, list):
-                    x = ac
-                else:
-                    x = ac.get("lessons", [])
-                    x.extend(ac.get("futureLessons", []))
-        except Exception:
-            pass
-
-    ad = []
-    ae = {}
-    for af in x:
-        if not isinstance(af, dict):
-            continue
-        ag = "Subject"
-        ah = af.get("classList") or []
-        if len(ah) > 0 and isinstance(ah[0], dict) and ah[0].get("courseName"):
-            ag = ah[0].get("courseName")
-        else:
-            ai = af.get("classIds") or []
-            if len(ai) > 0:
-                ag = q.get(str(ai[0]), "Subject")
-        ag = ag.replace('\xa0', ' ').strip()
-        aj = ag.lower()
+    # Weekends (Holidays)
+    for i in range(5, 7):
+        day = start_of_week + timedelta(days=i)
+        date_str = day.strftime("%Y-%m-%d")
+        timetable.extend([
+            {"courseName": "Holiday / Weekend", "start": f"{date_str} 00:00:00", "end": f"{date_str} 23:59:59", "type": "Off", "venue": "N/A", "faculty": "N/A"}
+        ])
         
-        ak = af.get("start") or af.get("startTime")
-        al = af.get("end") or af.get("endTime")
-        if not ak or not al:
-            continue
-        
-        am = ""
-        an = None
-        if len(ah) > 0 and isinstance(ah[0], dict):
-            am = (ah[0].get("batch") or "").lower()
-            an = ah[0].get("courseComponentTypeId")
-        ao = "Theory"
-        if an == 2 or "practical" in am or "lab" in am:
-            ao = "Lab"
-        
-        ap = "Classroom"
-        aq = af.get("venueDetails")
-        if isinstance(aq, dict) and aq.get("name"):
-            ap = aq.get("name")
-        else:
-            ap = af.get("venue") or af.get("room") or "Classroom"
-        
-        ar = ""
-        ast = af.get("facultyList") or []
-        if len(ast) > 0 and isinstance(ast[0], dict) and ast[0].get("facultyName"):
-            ar = ast[0].get("facultyName").replace('\xa0', ' ').strip()
-        
-        au = {"courseName": ag, "start": ak, "end": al, "type": ao, "venue": ap, "faculty": ar}
-        ad.append(au)
-        if aj not in ae:
-            ae[aj] = []
-        ae[aj].append(au)
+    return timetable
 
-    av = []
-    aw = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def generate_course_history(comp_type="Theory"):
+    now = datetime.now()
+    history = []
+    for i in range(1, 14):
+        day = now - timedelta(days=i)
+        if day.weekday() < 5:
+            date_str = day.strftime("%Y-%m-%d")
+            history.append({"start": f"{date_str} 09:00:00", "end": f"{date_str} 10:00:00", "status": "PRESENT", "comp": comp_type})
+            if comp_type == "Lab" and i % 3 == 0:
+                history.append({"start": f"{date_str} 10:30:00", "end": f"{date_str} 12:30:00", "status": "ABSENT", "comp": "Lab"})
+    return history
+
+@app.get("/api/dashboard")
+async def get_dashboard_data(token: str):
+    if token != "mock_demo_token_789":
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
     
-    for ax in n.get("courseAttendance", []):
-        ay = (ax.get("courseName") or ax.get("subjectName") or ax.get("name") or "Subject").replace('\xa0', ' ').strip()
-        az = ay.lower()
-        ba = ax.get("totalPresent", 0)
-        bb = ax.get("totalClasses", 0)
-        bc = calc_margin(ba, bb)
-        
-        bd = []
-        be = []
-        
-        for bf in ax.get("components", []):
-            bg = bf.get("className") or bf.get("courseName") or ""
-            bh = bf.get("courseComponentTypeId")
-            bi = "Theory"
-            if bh == 2 or "practical" in bg.lower() or "lab" in bg.lower():
-                bi = "Lab"
-            bj = bf.get("totalPresent", 0)
-            bk = bf.get("totalClasses", 0)
-            bl = calc_margin(bj, bk)
-            bd.append({"label": bi, "name": bg, "present": bj, "total": bk, "pct": bl["pct"], "status": bl["status"], "safe": bl["safe"]})
-            
-            for bm in bf.get("attendance", []):
-                bn = str(bm.get("lessonStartTime") or bm.get("date") or "")
-                if not bn:
-                    continue
-                bo = bn.split(".")[0]
-                if bo > aw:
-                    continue
-
-                raw_status = bm.get("finalStatus") or bm.get("status")
-                is_marked = bm.get("isMarked")
-                if is_marked is None:
-                    is_marked = bm.get("marked")
-
-                if is_marked is False or raw_status in ["NOT_MARKED", "UNMARKED", "PENDING", None]:
-                    if raw_status in ["PRESENT", "ABSENT", "OD"]:
-                        bp = raw_status
-                    elif bm.get("present") is True:
-                        bp = "PRESENT"
-                    elif is_marked is False or raw_status is None:
-                        bp = "NOT_MARKED"
-                    else:
-                        bp = "ABSENT"
-                else:
-                    bp = raw_status
-
-                be.append({"comp": bi, "status": bp, "start": bo, "end": str(bm.get("lessonEndTime") or "").split(".")[0]})
-                
-        be.sort(key=lambda x: x.get("start") or "", reverse=True)
-        bq = ae.get(az, [])
-        bq.sort(key=lambda x: x.get("start") or "")
-        
-        av.append({"name": ay, "present": ba, "total": bb, "pct": bc["pct"], "status": bc["status"], "safe": bc["safe"], "margin": bc["margin"], "components": bd, "history": be, "scheduled": bq})
-        
-    ad.sort(key=lambda x: x.get("start") or "")
-    
-    br = 0
-    if n.get("percentage"):
-        br = round(n.get("percentage"), 2)
     return {
-        "studentName": g, 
-        "profileDetails": i,
-        "totalPresent": n.get("totalPresent", 0), 
-        "totalClasses": n.get("totalClasses", 0), 
-        "percentage": br, 
-        "courses": av, 
-        "timetable": ad
+        "studentName": "Guest",
+        "profileDetails": {
+            "fullName": "Guest Demo",
+            "programme": "B.Tech Artificial Intelligence & Data Science",
+            "email": "demo@student.edu",
+            "phone": "+91 0000000000",
+            "batchYear": "2024",
+            "quota": "General",
+            "admissionType": "Regular"
+        },
+        "totalPresent": 185,
+        "totalClasses": 215,
+        "percentage": 86.04,
+        "courses": [
+            {
+                "name": "Data Privacy and Security",
+                "code": "AD23631",
+                "credits": 4,
+                "present": 42,
+                "total": 45,
+                "percentage": 93.3,
+                "components": [
+                    {"label": "Theory", "present": 42, "total": 45, "pct": 93.3, "status": "Safe", "safe": True}
+                ],
+                "history": generate_course_history("Theory"),
+                "scheduled": [
+                    {"courseName": "Data Privacy and Security", "start": f"{date_str} 08:30:00", "end": f"{date_str} 10:30:00", "type": "Theory", "venue": "Room 301"}
+                ]
+            },
+            {
+                "name": "Framework for Data and Visual Analytics",
+                "code": "AD23632",
+                "credits": 4,
+                "present": 38,
+                "total": 48,
+                "percentage": 79.1,
+                "components": [
+                    {"label": "Theory", "present": 20, "total": 24, "pct": 83.3, "status": "Safe", "safe": True},
+                    {"label": "Lab", "present": 18, "total": 24, "pct": 75.0, "status": "Safe", "safe": True}
+                ],
+                "history": generate_course_history("Lab"),
+                "scheduled": [
+                    {"courseName": "Framework for Data and Visual Analytics", "start": f"{date_str} 12:30:00", "end": f"{date_str} 14:30:00", "type": "Lab", "venue": "Data Lab 1"}
+                ]
+            },
+            {
+                "name": "Generative AI",
+                "code": "AD23633",
+                "credits": 3,
+                "present": 28,
+                "total": 39,
+                "percentage": 71.7,
+                "components": [
+                    {"label": "Theory", "present": 28, "total": 39, "pct": 71.7, "status": "At Risk", "safe": False}
+                ],
+                "history": generate_course_history("Theory"),
+                "scheduled": [
+                    {"courseName": "Generative AI", "start": f"{date_str} 10:45:00", "end": f"{date_str} 11:45:00", "type": "Theory", "venue": "Room 205"}
+                ]
+            },
+            {
+                "name": "Design Thinking and Innovation",
+                "code": "GE23627",
+                "credits": 2,
+                "present": 20,
+                "total": 20,
+                "percentage": 100.0,
+                "components": [
+                    {"label": "Lab", "present": 20, "total": 20, "pct": 100.0, "status": "Safe", "safe": True}
+                ],
+                "history": generate_course_history("Lab"),
+                "scheduled": []
+            }
+        ],
+        "timetable": generate_dynamic_timetable(),
+        "semesters": [
+            {
+                "termName": "Semester 1",
+                "sgpa": "9.20",
+                "courses": [
+                    {"name": "Mathematical Foundations for AI", "code": "MA23116", "credits": 4, "grade": "O", "gp": 10.0, "examId": "1", "termCourseId": "11"},
+                    {"name": "Physics for Information Science", "code": "PH23132", "credits": 4, "grade": "O", "gp": 10.0, "examId": "1", "termCourseId": "12"},
+                    {"name": "Programming using C", "code": "GE23131", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "1", "termCourseId": "13"},
+                    {"name": "Basic Electrical and Electronics", "code": "EE23133", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "1", "termCourseId": "14"},
+                    {"name": "Engineering Practices", "code": "GE23123", "credits": 2, "grade": "A", "gp": 8.0, "examId": "1", "termCourseId": "15"},
+                    {"name": "Technical Communication I", "code": "HS23111", "credits": 2, "grade": "A+", "gp": 9.0, "examId": "1", "termCourseId": "16"},
+                    {"name": "Heritage of Tamils", "code": "GE23117", "credits": 1, "grade": "O", "gp": 10.0, "examId": "1", "termCourseId": "17"}
+                ]
+            },
+            {
+                "termName": "Semester 2",
+                "sgpa": "8.85",
+                "courses": [
+                    {"name": "Probability and Inferential Statistics", "code": "MA23214", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "2", "termCourseId": "21"},
+                    {"name": "Data Structures", "code": "CS23231", "credits": 5, "grade": "O", "gp": 10.0, "examId": "2", "termCourseId": "22"},
+                    {"name": "Digital Principles and Architecture", "code": "IT23231", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "2", "termCourseId": "23"},
+                    {"name": "Engineering Graphics", "code": "GE23111", "credits": 4, "grade": "B+", "gp": 7.0, "examId": "2", "termCourseId": "24"},
+                    {"name": "Python Programming Lab", "code": "CS23221", "credits": 2, "grade": "O", "gp": 10.0, "examId": "2", "termCourseId": "25"},
+                    {"name": "Tamils and Technology", "code": "GE23217", "credits": 1, "grade": "A+", "gp": 9.0, "examId": "2", "termCourseId": "26"},
+                    {"name": "Technical Communication II", "code": "HS23221", "credits": 1, "grade": "A", "gp": 8.0, "examId": "2", "termCourseId": "27"}
+                ]
+            },
+            {
+                "termName": "Semester 3",
+                "sgpa": "8.65",
+                "courses": [
+                    {"name": "Database Management Systems", "code": "CS23332", "credits": 5, "grade": "A+", "gp": 9.0, "examId": "3", "termCourseId": "31"},
+                    {"name": "Discrete Mathematics for AI", "code": "MA23313", "credits": 4, "grade": "A", "gp": 8.0, "examId": "3", "termCourseId": "32"},
+                    {"name": "Principles of Artificial Intelligence", "code": "AI23231", "credits": 4, "grade": "O", "gp": 10.0, "examId": "3", "termCourseId": "33"},
+                    {"name": "Design and Analysis of Algorithms", "code": "CS23331", "credits": 4, "grade": "B+", "gp": 7.0, "examId": "3", "termCourseId": "34"},
+                    {"name": "Object Oriented Programming", "code": "CS23333", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "3", "termCourseId": "35"}
+                ]
+            },
+            {
+                "termName": "Semester 4",
+                "sgpa": "9.10",
+                "courses": [
+                    {"name": "Operating Systems", "code": "CS23431", "credits": 5, "grade": "A+", "gp": 9.0, "examId": "4", "termCourseId": "41"},
+                    {"name": "Software Construction", "code": "CS23432", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "4", "termCourseId": "42"},
+                    {"name": "Fundamentals of Machine Learning", "code": "AI23331", "credits": 4, "grade": "O", "gp": 10.0, "examId": "4", "termCourseId": "43"},
+                    {"name": "Optimization Techniques for AI", "code": "MA23434", "credits": 4, "grade": "O", "gp": 10.0, "examId": "4", "termCourseId": "44"},
+                    {"name": "Statistical Analysis and Computing", "code": "AD23431", "credits": 3, "grade": "A+", "gp": 9.0, "examId": "4", "termCourseId": "45"},
+                    {"name": "Web Technology and Mobile App", "code": "AI23431", "credits": 3, "grade": "A", "gp": 8.0, "examId": "4", "termCourseId": "46"}
+                ]
+            },
+            {
+                "termName": "Semester 5",
+                "sgpa": "8.85",
+                "courses": [
+                    {"name": "Computer Networks", "code": "CS23532", "credits": 5, "grade": "A+", "gp": 9.0, "examId": "5", "termCourseId": "51"},
+                    {"name": "Big Data Architecture", "code": "AD23531", "credits": 4, "grade": "A", "gp": 8.0, "examId": "5", "termCourseId": "52"},
+                    {"name": "Principles of Data Science", "code": "AD23532", "credits": 4, "grade": "O", "gp": 10.0, "examId": "5", "termCourseId": "53"},
+                    {"name": "Deep Learning", "code": "AI23531", "credits": 4, "grade": "A+", "gp": 9.0, "examId": "5", "termCourseId": "54"},
+                    {"name": "Customer Analytics", "code": "AD23A31", "credits": 3, "grade": "A", "gp": 8.0, "examId": "5", "termCourseId": "55"},
+                    {"name": "Image Processing and Vision", "code": "AD23B31", "credits": 3, "grade": "A+", "gp": 9.0, "examId": "5", "termCourseId": "56"}
+                ]
+            },
+            {
+                "termName": "Semester 6",
+                "sgpa": "--",
+                "courses": [
+                    {"name": "Data Privacy and Security", "code": "AD23631", "credits": 4, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "61"},
+                    {"name": "Framework for Data and Visual Analytics", "code": "AD23632", "credits": 4, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "62"},
+                    {"name": "Generative AI", "code": "AD23633", "credits": 3, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "63"},
+                    {"name": "Design Thinking and Innovation", "code": "GE23627", "credits": 2, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "64"},
+                    {"name": "Problem Solving Techniques", "code": "GE23621", "credits": 1, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "65"},
+                    {"name": "Internship", "code": "AD23621", "credits": 3, "grade": "--", "gp": "--", "examId": "6", "termCourseId": "66"}
+                ]
+            }
+        ]
     }
 
-@app.post("/api/results")
-def fetch_results(a: AuthRequest):
-    b = a.token.strip().strip('"').strip("'")
-    if b.lower().startswith("bearer "):
-        b = b[7:].strip()
-    
-    c = "https://rajalakshmi.digiicampus.com"
-    d = {"auth-token": b, "Authorization": f"Bearer {b}", "User-Agent": "Mozilla/5.0", "Accept": "application/json"}
-    e = {"user": b}
-    
-    f = a.user_id
-    if not f:
-        f = get_user_id(b, d, e, c)
-    if not f:
-        return {"semesters": []}
-
-    g = set()
-    try:
-        h = requests.get(f"{c}/rest/programmeBatchTerms", headers=d, cookies=e, timeout=4)
-        if h.status_code == 200:
-            i = h.json()
-            j = []
-            if isinstance(i, list):
-                j = i
-            else:
-                j = i.get("terms", [])
-            for k in j:
-                if isinstance(k, dict) and k.get("id"):
-                    g.add(int(k["id"]))
-    except Exception:
-        pass
-
-    l = set()
-    for m in range(1, 65):
-        l.add(m)
-    n = list(g.union(l))
-
-    def o(p):
-        q = f"{c}/api/v2/resultDeclaration/student/term/{p}/{f}"
-        try:
-            r = requests.get(q, headers=d, cookies=e, timeout=4)
-            if r.status_code == 200 and len(r.text) > 20:
-                s = r.json()
-                if not isinstance(s, dict) or not s.get("courses"):
-                    return None
-                
-                t = s.get("examId", "")
-                
-                u = []
-                for v in s.get("courses", []):
-                    w = str(v.get("grade") or v.get("finalGrade") or "--")
-                    x = float(v.get("gradePoint") or v.get("finalGradePoint") or 0)
-                    y = str(v.get("termCourseId", ""))
-                    
-                    if w.upper() == "U":
-                        x = 0.0
-
-                    u.append({
-                        "name": v.get("courseName") or v.get("name") or "Subject",
-                        "code": v.get("courseCode") or v.get("code") or "",
-                        "credits": v.get("courseCredits") or v.get("creditHours") or v.get("credits") or 0,
-                        "grade": w,
-                        "gp": x,
-                        "examId": t,
-                        "termCourseId": y
-                    })
-                
-                z = str(s.get("sgpa")) if s.get("sgpa") is not None else "--"
-                return {
-                    "tid": p,
-                    "examName": s.get("examName") or "",
-                    "sgpa": z,
-                    "courses": u
-                }
-        except Exception:
-            return None
-
-    aa = []
-    with ThreadPoolExecutor(max_workers=15) as ab:
-        ac = []
-        for ad in n:
-            ac.append(ab.submit(o, ad))
-        for ae in as_completed(ac):
-            af = ae.result()
-            if af:
-                aa.append(af)
-
-    aa.sort(key=lambda x: x["tid"])
-
-    ag = []
-    ah = set()
-    for ai, aj in enumerate(aa):
-        ak = parse_sem_name(aj["examName"], ai + 1)
-        if ak in ah:
-            ak = f"{ak} ({aj['tid']})"
-        ah.add(ak)
-        
-        ag.append({
-            "termName": ak,
-            "sgpa": aj["sgpa"],
-            "courses": aj["courses"]
-        })
-            
-    return {"semesters": ag}
-
 @app.post("/api/result_breakdown")
-def get_result_breakdown(a: BreakdownRequest):
-    b = a.token.strip().strip('"').strip("'")
-    if b.lower().startswith("bearer "):
-        b = b[7:].strip()
-    c = "https://rajalakshmi.digiicampus.com"
-    d = {"auth-token": b, "Authorization": f"Bearer {b}", "User-Agent": "Mozilla/5.0", "Accept": "application/json"}
-    e = {"user": b}
-    
-    if not a.user_id or not a.exam_id or not a.term_course_id:
-        return {}
-        
-    f = f"{c}/api/v2/resultDeclaration/student/course-breakdown/{a.exam_id}/{a.user_id}/{a.term_course_id}"
-    try:
-        g = requests.get(f, headers=d, cookies=e, timeout=5)
-        if g.status_code == 200:
-            return g.json()
-    except Exception:
-        pass
-    return {}
-
-@app.post("/api/user_data/save")
-def save_user_data(a: SaveRequest):
-    if not a.user_id:
-        return {"status": "error", "detail": "Missing"}
-    b = sqlite3.connect(os.environ.get("DB_PATH", ".campus_portal.db"))
-    c = b.cursor()
-    c.execute("INSERT OR REPLACE INTO user_data (user_id, plan_json, od_json) VALUES (?, ?, ?)", (a.user_id, a.plan_json, a.od_json))
-    b.commit()
-    b.close()
-    return {"status": "success"}
-
-@app.post("/api/user_data/load")
-def load_user_data(a: AuthRequest):
-    if not a.user_id:
-        return {"plan": {}, "ods": {}}
-    b = sqlite3.connect(os.environ.get("DB_PATH", ".campus_portal.db"))
-    c = b.cursor()
-    c.execute("SELECT plan_json, od_json FROM user_data WHERE user_id=?", (a.user_id,))
-    d = c.fetchone()
-    b.close()
-    if d:
-        return {"plan": json.loads(d[0]), "ods": json.loads(d[1])}
-    return {"plan": {}, "ods": {}}
+def get_result_breakdown():
+    return {
+        "components": [
+            {
+                "componentName": "Internal Assessment",
+                "totalMarks": 40,
+                "effectiveMarks": 36.5,
+                "assessments": [
+                    {"assessmentName": "CAT 1", "obtainedMarks": 45, "totalMarks": 50},
+                    {"assessmentName": "CAT 2", "obtainedMarks": 42, "totalMarks": 50}
+                ]
+            },
+            {
+                "componentName": "Semester End Examination",
+                "totalMarks": 60,
+                "effectiveMarks": 52.0,
+                "assessments": [
+                    {"assessmentName": "Theory Exam", "obtainedMarks": 88, "totalMarks": 100}
+                ]
+            }
+        ]
+    }
 
 if __name__ == "__main__":
-    a = int(os.environ.get("PORT", 8000))
-    uvicorn.run("server:app", host="0.0.0.0", port=a)
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

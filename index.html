@@ -2,15 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digiicampus Student Portal</title>
-  
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#030303" />
-  <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/192/ffffff/graduation-cap.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Student Portal Architecture Demo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +14,7 @@
   <style>
     :root { --bg: #030303; --card: rgba(255,255,255,0.02); --card-hover: rgba(255,255,255,0.04); --brd: rgba(255,255,255,0.04); --brd-hover: rgba(255,255,255,0.1); --accent: #ffffff; }
     * { box-sizing: border-box; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; overflow-x: hidden; color: #e5e5e5; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); min-height: 100vh; overflow-x: hidden; color: #e5e5e5; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); -webkit-tap-highlight-color: transparent; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     .ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 50%); }
     .orb { position: absolute; width: 40vw; height: 40vw; border-radius: 50%; filter: blur(100px); opacity: 0.3; animation: float 20s infinite ease-in-out alternate; }
@@ -62,15 +58,13 @@
     .input-clean { background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: #fff; transition: all 0.3s; }
     .input-clean:focus { outline: none; border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.02); }
     .txt-micro { font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; }
-  </style>
-</head>
-<body>
+  </style></head><body>
   <div class="ambient"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
   <div class="relative z-10 max-w-[600px] mx-auto px-5 py-12 space-y-8">
     <header class="flex items-end justify-between fade-in pb-3 border-b border-white/[0.04]" style="animation-delay:0s">
       <div>
         <div class="flex items-center gap-2 mb-1.5">
-          <h1 id="userHeading" class="text-3xl font-normal tracking-tight text-white">Hi, Student</h1>
+          <h1 id="userHeading" class="text-3xl font-normal tracking-tight text-white">Hi, Guest</h1>
           <button type="button" onclick="openProfileModal()" id="profileBtn" class="hidden w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-neutral-300 transition click-pop text-xs" title="View Profile">ℹ</button>
         </div>
         <p class="text-xs font-medium text-neutral-400 tracking-wide" id="headerDateLine"></p>
@@ -79,23 +73,25 @@
         <button type="button" onclick="logout()" id="logoutBtn" class="hidden btn-clean px-4 py-2 txt-micro click-pop">Logout</button>
       </div>
     </header>
+    
     <div id="authSection" class="glass p-8 fade-in" style="animation-delay:0.1s">
       <div class="mb-8">
         <h2 class="text-2xl font-light text-white mb-2">Connect</h2>
-        <p class="text-xs text-neutral-500 font-mono">DIGIICAMPUS_AUTH_TOKEN</p>
+        <p class="text-xs text-neutral-500 font-mono uppercase tracking-widest">Portfolio Demo Access</p>
       </div>
-      <textarea id="tokenInput" rows="3" class="input-clean w-full p-5 text-xs font-mono mb-6 resize-none" placeholder="eyJhbG..."></textarea>
+      <input type="email" id="emailInput" class="input-clean w-full p-4 text-sm mb-4 bg-white/[0.01]" value="demo@student.edu" readonly>
+      <input type="password" id="passwordInput" class="input-clean w-full p-4 text-sm mb-6 bg-white/[0.01]" value="demo123" readonly>
       <div class="flex gap-3">
-        <button type="button" onclick="handleAuth()" id="loadBtn" class="flex-1 bg-white text-black font-medium py-4 rounded-[20px] text-sm hover:scale-[0.99] transition-transform click-pop">Log in</button>
-        <button type="button" onclick="loadDemoMode()" id="demoBtn" class="flex-1 bg-white/5 border border-white/10 text-white font-medium py-4 rounded-[20px] text-sm hover:bg-white/10 hover:scale-[0.99] transition-all click-pop">Try Demo</button>
+        <button type="button" onclick="handleAuth()" id="loadBtn" class="flex-1 bg-white text-black font-medium py-4 rounded-[20px] text-sm hover:scale-[0.99] transition-transform click-pop">Log in to Demo</button>
       </div>
-      <div id="demoIndicator" class="hidden mt-4 text-center">
-        <span class="text-[10px] uppercase tracking-widest font-mono text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">Demo Mode Active</span>
+      <div id="demoIndicator" class="mt-4 text-center">
+        <span class="text-[10px] uppercase tracking-widest font-mono text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">Mock Architecture Ready</span>
       </div>
       <div id="errorMsg" class="hidden mt-4 p-4 border border-red-500/20 rounded-[20px] bg-red-500/5">
         <p class="text-red-400 text-xs font-mono"></p>
       </div>
     </div>
+
     <div id="dashboard" class="hidden space-y-8">
       <nav class="relative flex items-center gap-2 p-1.5 glass rounded-full fade-in" id="mainNav" style="animation-delay:0.1s">
         <div id="navSlider" class="absolute top-1.5 bottom-1.5 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_20px_rgba(255,255,255,0.2)] pointer-events-none"></div>
@@ -211,6 +207,7 @@
       </section>
     </div>
   </div>
+
   <div id="profileModal" class="fixed inset-0 modal-backdrop z-[80] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full max-w-[420px] rounded-[32px] border border-white/10 flex flex-col max-h-[85vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="profileModalInner">
       <div class="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
@@ -238,6 +235,7 @@
       </div>
     </div>
   </div>
+
   <div id="calendarModal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full max-w-[850px] h-[680px] rounded-[40px] border border-white/5 flex flex-col overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="calendarModalInner">
       <div class="p-6 pb-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
@@ -266,6 +264,7 @@
       <div id="calendarViewBody" class="flex-1 flex flex-col overflow-hidden bg-[#030303]/40"></div>
     </div>
   </div>
+
   <div id="classDetailModal" class="fixed inset-0 modal-backdrop z-[70] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full max-w-[400px] rounded-[32px] border border-white/10 flex flex-col overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="classDetailInner">
       <div class="p-6 border-b border-white/5 flex items-center justify-between">
@@ -295,6 +294,7 @@
       </div>
     </div>
   </div>
+
   <div id="resultDetailModal" class="fixed inset-0 modal-backdrop z-[70] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full max-w-[400px] rounded-[32px] border border-white/10 flex flex-col max-h-[85vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="resultDetailInner">
       <div class="p-6 border-b border-white/5 flex items-center justify-between flex-shrink-0">
@@ -328,6 +328,7 @@
       </div>
     </div>
   </div>
+
   <div id="gradeSelectorModal" class="fixed inset-0 modal-backdrop z-[90] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300" onclick="if(event.target===this) closeGradeSelector()">
     <div class="bg-[#0a0a0b] w-[340px] rounded-[32px] border border-white/10 flex flex-col overflow-hidden transform scale-95 translate-y-4 transition-all duration-500 cubic-bezier(0.16,1,0.3,1) shadow-2xl shadow-black" id="gradeSelectorInner">
       <div class="p-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
@@ -342,6 +343,7 @@
       <div id="gradeSelectorList" class="grid grid-cols-4 gap-2.5 p-5"></div>
     </div>
   </div>
+
   <div id="dayDetailModal" class="fixed inset-0 modal-backdrop z-[60] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full max-w-[420px] rounded-[32px] border border-white/10 flex flex-col max-h-[80vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="dayDetailInner">
       <div class="p-6 border-b border-white/5 flex items-center justify-between">
@@ -356,6 +358,7 @@
       <div id="dayDetailContent" class="p-5 overflow-y-auto space-y-2 flex-1 custom-scrollbar"></div>
     </div>
   </div>
+
   <div id="subjectModal" class="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center p-0 sm:p-5 hidden opacity-0 transition-opacity duration-300">
     <div class="bg-[#0a0a0b] w-full sm:max-w-[500px] sm:rounded-[40px] rounded-t-[40px] border border-white/5 flex flex-col max-h-[90vh] overflow-hidden transform translate-y-10 transition-transform duration-500 cubic-bezier(0.16,1,0.3,1)" id="modalInner">
       <div class="p-8 pb-6 border-b border-white/5 relative">
@@ -405,7 +408,6 @@
           <div id="filterStatusSlider" class="absolute top-1 bottom-1 rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] pointer-events-none"></div>
           <button type="button" onclick="setFilter('status','PRESENT')" id="statusFilterPresent" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Present</button>
           <button type="button" onclick="setFilter('status','ABSENT')" id="statusFilterAbsent" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Absent</button>
-          <button type="button" onclick="setFilter('status','NOT_MARKED')" id="statusFilterNotMarked" class="relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop">Unmarked</button>
         </div>
       </div>
       <div id="upcomingSimulatorBar" class="p-6 border-b border-white/5 bg-white/[0.01] hidden">
@@ -427,27 +429,29 @@
       <div id="subModalContentList" class="p-4 h-[300px] overflow-y-auto space-y-2 custom-scrollbar"></div>
     </div>
   </div>
-  <div id="syncToast" class="fixed bottom-[-100px] right-5 glass flex items-center gap-3 px-4 py-3 border-white/10 transition-all duration-500 z-50">
-    <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-    <span class="text-xs font-medium text-white">Live data synced</span>
-  </div>
-  
+
   <div id="loaderOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] flex flex-col items-center justify-center hidden opacity-0 transition-opacity duration-300">
     <div class="glass-login-box flex flex-col items-center justify-center px-12 py-10 rounded-[32px]">
         <div class="w-12 h-12 rounded-full border-4 border-white/10 border-t-white animate-spin mb-5"></div>
-        <p class="text-white text-sm font-mono font-medium animate-pulse tracking-widest" id="loaderText">CONNECTING</p>
+        <p class="text-white text-sm font-mono font-medium animate-pulse tracking-widest" id="loaderText">AUTHENTICATING</p>
     </div>
   </div>
-  
-  <script src="demo_data.js"></script>
 
   <script>
-    const API_BASE = "https://digiicampus-student-portal.onrender.com";
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) registration.unregister();
+        });
+    }
+    if ('caches' in window) {
+        caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    const API_BASE = "https://mock-campus-api-1.onrender.com";
+    
     let apiData = null; 
     let scheduleMap = {}; 
     let activeDay = null; 
     let activeSemIndex = 0;
-    let isDemoMode = false;
     
     let activeCourseIndex = null; 
     let activeModalTab = 'history'; 
@@ -462,24 +466,19 @@
     let calCurrentDate = new Date();
     let timeIndicatorInterval = null;
     
+    // Stateless tracking logic kept purely in the browser for demo purposes
     let savedPlans = JSON.parse(localStorage.getItem("cp_plan") || "{}"); 
-    let savedODs = JSON.parse(localStorage.getItem("cp_ods") || "{}"); 
+    let savedODs = JSON.parse(localStorage.getItem("cp_ods") || "{}");
     
     let rProj = false;
     let rSim = {};
     let tgSem = null;
     let tgCr = null;
     
-    const gMap = {'S':10,'A+':9,'A':8,'B+':7,'B':6.5,'C+':6,'C':5,'U':0};
-    const gArr = ['S','A+','A','B+','B','C+','C','U'];
+    const gMap = {'O':10,'A+':9,'A':8,'B+':7,'B':6,'C+':5,'C':5,'U':0};
+    const gArr = ['O','A+','A','B+','B','U'];
 
     document.getElementById('headerDateLine').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-
-    const existingToken = localStorage.getItem('auth_token');
-    if (existingToken) {
-        document.getElementById('tokenInput').value = existingToken;
-        handleAuth();
-    }
 
     const clrMap = ['bg-blue-500/10 border border-blue-500/20 text-blue-200','bg-purple-500/10 border border-purple-500/20 text-purple-200','bg-rose-500/10 border border-rose-500/20 text-rose-200','bg-amber-500/10 border border-amber-500/20 text-amber-200','bg-emerald-500/10 border border-emerald-500/20 text-emerald-200','bg-cyan-500/10 border border-cyan-500/20 text-cyan-200','bg-indigo-500/10 border border-indigo-500/20 text-indigo-200'];
     let subClrDict = {};
@@ -508,58 +507,14 @@
         window.requestAnimationFrame(step);
     }
 
-    function syncToDB() {
-        if (isDemoMode) return;
-        let uId = localStorage.getItem('auth_uid') || "";
-        const t = localStorage.getItem('auth_token');
-        if (!t) return;
-        fetch(`${API_BASE}/api/user_data/save`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: t, user_id: uId, plan_json: JSON.stringify(savedPlans), od_json: JSON.stringify(savedODs) })
-        }).catch(() => {});
-    }
-
-    async function loadFromDB(token, uId) {
-        if (isDemoMode) return;
-        try {
-            const res = await fetch(`${API_BASE}/api/user_data/load`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: token, user_id: uId, user_name: "" })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                savedPlans = data.plan || {};
-                savedODs = data.ods || {};
-            }
-        } catch(e) {
-            savedPlans = {}; savedODs = {};
-        }
-    }
-
-    function getCleanFirstName(fullName) {
-        if (!fullName || fullName === 'Student') return 'Student';
-        const cleanStr = fullName.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ').trim();
-        if (!cleanStr) return 'Student';
-        const parts = cleanStr.split(' ');
-        let validPart = parts.find(p => p.length > 1) || parts[0];
-        return validPart.charAt(0).toUpperCase() + validPart.slice(1).toLowerCase();
-    }
-
-    function formatProperName(rawName) {
-        if (!rawName || rawName === 'Student') return 'Student';
-        return rawName.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    }
-
-    function loadDemoMode() {
-        document.getElementById('tokenInput').value = "demo";
-        handleAuth();
+    function saveStateLocal() {
+        localStorage.setItem("cp_plan", JSON.stringify(savedPlans));
+        localStorage.setItem("cp_ods", JSON.stringify(savedODs));
     }
 
     async function handleAuth() {
-        const a = document.getElementById('tokenInput').value.trim();
-        if (!a) { showError('Token required'); return; }
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('passwordInput').value;
         
         const b = document.getElementById('loaderOverlay');
         const c = document.getElementById('loaderText');
@@ -568,83 +523,28 @@
         
         document.getElementById('errorMsg').classList.add('hidden');
         document.getElementById('loadBtn').disabled = true;
-        if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = true;
 
-        if (a.toLowerCase() === 'demo') {
-            c.innerText = 'LOADING DEMO DATASET';
-            isDemoMode = true;
+        try {
+            c.innerText = 'AUTHENTICATING';
+            const loginRes = await fetch(`${API_BASE}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!loginRes.ok) throw new Error();
+            const loginData = await loginRes.json();
+            const token = loginData.access_token;
             
-            setTimeout(() => {
-                if (typeof demoStudentData === 'undefined') {
-                    showError('demo_data.js file is missing or not linked.');
-                    b.classList.add('opacity-0');
-                    setTimeout(() => b.classList.add('hidden'), 300);
-                    document.getElementById('loadBtn').disabled = false;
-                    if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
-                    return;
-                }
-
-                apiData = JSON.parse(JSON.stringify(demoStudentData)); 
-                window.userProfileData = apiData.profileDetails;
-                document.getElementById('userHeading').innerText = `Hi, ${getCleanFirstName(apiData.profileDetails.fullName)}`;
-                document.getElementById('demoIndicator').classList.remove('hidden');
-                
-                initDashboard();
-                
-                document.getElementById('loadBtn').disabled = false;
-                if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
-                b.classList.add('opacity-0');
-                setTimeout(() => b.classList.add('hidden'), 300);
-            }, 800);
-            return;
-        }
-
-        let d = "";
-        let e = "Student";
-        try {
-            const f = a.split('.')[1];
-            if (f) {
-                const g = JSON.parse(atob(f.replace(/-/g, '+').replace(/_/g, '/')));
-                const h = String(g.userId || g.sub || g.id || g.ukid || "");
-                const i = h.match(/\d+/);
-                if (i) d = i[0];
-                e = g.name || g.firstName || g.preferred_username || "Student";
-            }
-        } catch(j) {}
-
-        try {
-            c.innerText = 'LOADING CACHE';
-            await loadFromDB(a, d);
-            const k = JSON.stringify({ token: a, user_id: d, user_name: e });
-
-            c.innerText = 'FETCHING API';
-            const l = await fetch(`${API_BASE}/api/attendance`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: k
-            });
-            const m = await fetch(`${API_BASE}/api/results`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: k
-            });
-
-            if (!l.ok) throw new Error();
+            c.innerText = 'FETCHING DEMO DATA';
+            const attRes = await fetch(`${API_BASE}/api/dashboard?token=${token}`);
+            if (!attRes.ok) throw new Error();
+            apiData = await attRes.json();
             
             c.innerText = 'BUILDING UI';
-            apiData = await l.json();
-            
-            if (m.ok) {
-                const n = await m.json();
-                apiData.semesters = n.semesters || [];
-            } else {
-                apiData.semesters = [];
-            }
-            
-            let o = apiData.profileDetails?.fullName || apiData.studentName || e || 'Student';
-            document.getElementById('userHeading').innerText = `Hi, ${getCleanFirstName(o)}`;
+            document.getElementById('userHeading').innerText = `Hi, ${apiData.studentName}`;
+            window.userProfileData = apiData.profileDetails;
 
-            window.userProfileData = apiData.profileDetails || {
-                fullName: formatProperName(o), email: '--', phone: '--', programme: '--', batchYear: '--', quota: '--', admissionType: '--', profilePic: ''
-            };
-            window.userProfileData.fullName = formatProperName(o);
-            
             if (apiData && apiData.courses) {
                 apiData.courses.forEach(p => {
                     p.simPresent = p.present;
@@ -658,39 +558,44 @@
                 });
             }
 
-            localStorage.setItem('auth_token', a);
-            localStorage.setItem('auth_uid', d);
-            localStorage.setItem('cp_plan', JSON.stringify(savedPlans));
-            localStorage.setItem('cp_ods', JSON.stringify(savedODs));
-            
-            updateTokenExpiry(a);
+            if (apiData && apiData.semesters && apiData.semesters.length > 0) {
+                apiData.semesters.sort((a, b) => 
+                    (a.termName || "").localeCompare(b.termName || "", undefined, { numeric: true })
+                );
+                activeSemIndex = apiData.semesters.length - 1;
+            }
+
+            localStorage.setItem('demo_token', token);
             initDashboard();
         } catch (r) {
-            showError('Connection failed.');
+            showError('Network error. Ensure FastAPI is running.');
         } finally {
             document.getElementById('loadBtn').disabled = false;
-            if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
             b.classList.add('opacity-0');
             setTimeout(() => b.classList.add('hidden'), 300);
         }
+    }
+
+    // Auto-login for persistent demo
+    if (localStorage.getItem('demo_token')) {
+        handleAuth();
     }
 
     function logout() {
         localStorage.clear();
         if (trackerInterval) clearInterval(trackerInterval);
         if (timeIndicatorInterval) clearInterval(timeIndicatorInterval);
-        document.getElementById('authSection').classList.remove('hidden');
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('logoutBtn').classList.add('hidden');
-        document.getElementById('profileBtn').classList.add('hidden');
-        document.getElementById('tokenInput').value = '';
-        document.getElementById('userHeading').innerText = 'Hi, Student';
-        rProj = false;
-        rSim = {};
         
-        isDemoMode = false;
-        document.getElementById('demoIndicator').classList.add('hidden');
-        if(document.getElementById('demoBtn')) document.getElementById('demoBtn').disabled = false;
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) registration.unregister();
+            });
+        }
+        if ('caches' in window) {
+            caches.keys().then(names => names.forEach(name => caches.delete(name)));
+        }
+        
+        window.location.reload(true);
     }
 
     function openProfileModal() {
@@ -702,14 +607,6 @@
         document.getElementById('profileBatch').innerText = p.batchYear || '--';
         document.getElementById('profileQuota').innerText = p.quota || '--';
         document.getElementById('profileAdmission').innerText = p.admissionType || '--';
-
-        const picImg = document.getElementById('profilePicImg');
-        if (p.profilePic) {
-            picImg.src = p.profilePic;
-            picImg.classList.remove('hidden');
-        } else {
-            picImg.classList.add('hidden');
-        }
 
         const modal = document.getElementById('profileModal');
         const inner = document.getElementById('profileModalInner');
@@ -732,25 +629,6 @@
         const el = document.getElementById('errorMsg');
         el.querySelector('p').innerText = msg;
         el.classList.remove('hidden');
-    }
-
-    function updateTokenExpiry(token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (!payload.exp) return;
-            const diff = (payload.exp * 1000) - Date.now();
-            const tag = document.getElementById('tokenExpiryTag');
-            if (tag) {
-                tag.classList.remove('hidden');
-                if (diff <= 0) {
-                    tag.innerText = 'EXPIRED';
-                } else {
-                    const d = Math.floor(diff / 86400000);
-                    const h = Math.floor((diff % 86400000) / 3600000);
-                    tag.innerText = d > 0 ? `${d}d ${h}h` : `${h}h`;
-                }
-            }
-        } catch {}
     }
 
     function updateSliderPosition(activeBtn, sliderId) {
@@ -907,16 +785,10 @@
         const currentSgpaEl = document.getElementById('resultsCurrentSgpaVal');
         
         if (!tabsEl || !contentEl || !apiData.semesters) return;
-
         const sems = apiData.semesters;
 
         if (sems.length === 0) {
             contentEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">No results data found.</div>`;
-            if (cgpaEl) cgpaEl.innerText = '--';
-            if (currentSgpaEl) currentSgpaEl.innerText = '0.00';
-            if (semTitleEl) semTitleEl.innerText = 'No Data';
-            if (sgpaCircle) sgpaCircle.style.strokeDashoffset = '289';
-            tabsEl.innerHTML = '';
             return;
         }
 
@@ -1105,29 +977,18 @@
             inner.classList.remove('translate-y-10');
         }, 10);
 
-        if (!course.examId || !course.termCourseId) return;
-
         loaderDiv.classList.remove('hidden');
 
         try {
-            const token = localStorage.getItem('auth_token');
-            const uId = localStorage.getItem('auth_uid');
-            const res = await fetch(`${API_BASE}/api/result_breakdown`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: token, user_id: uId, exam_id: String(course.examId), term_course_id: String(course.termCourseId) })
-            });
-
+            const res = await fetch(`${API_BASE}/api/result_breakdown`, { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
                 let breakdownHtml = '';
-
-                if (data.components && data.components.length > 0) {
+                if (data.components) {
                     data.components.forEach(comp => {
                         breakdownHtml += `<div class="bg-white/5 rounded-2xl p-4 mb-3">`;
                         breakdownHtml += `<span class="txt-micro text-neutral-500 mb-3 block border-b border-white/5 pb-2">${comp.componentName}</span>`;
-                        
-                        if (comp.assessments && comp.assessments.length > 0) {
+                        if (comp.assessments) {
                             comp.assessments.forEach(ass => {
                                 breakdownHtml += `
                                 <div class="flex items-center justify-between mb-2">
@@ -1136,7 +997,6 @@
                                 </div>`;
                             });
                         }
-                        
                         breakdownHtml += `
                             <div class="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
                                 <span class="text-xs text-neutral-400 font-mono">Effective</span>
@@ -1144,16 +1004,7 @@
                             </div>
                         </div>`;
                     });
-                } else if (data.marks) {
-                    breakdownHtml = `
-                    <div class="bg-white/5 rounded-2xl p-4">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs text-neutral-400 font-mono">Total Marks</span>
-                            <span class="text-xs font-mono text-white font-medium">${parseFloat(data.marks).toFixed(1)}</span>
-                        </div>
-                    </div>`;
                 }
-
                 contentDiv.innerHTML = breakdownHtml;
             }
         } catch (e) {}
@@ -1188,9 +1039,8 @@
     function calculateStreak(historyArray) {
         let streak = 0;
         for (let log of historyArray) {
-            const s = (log.status || '').toUpperCase();
-            if (s === "PRESENT" || s === "P") streak++;
-            else if (s === "ABSENT" || s === "A") break;
+            if (log.status === "PRESENT") streak++;
+            else if (log.status === "ABSENT") break;
         }
         return streak;
     }
@@ -1224,8 +1074,6 @@
     }
     
     function formatStatus(status) {
-        const s = (status || '').toUpperCase();
-        if (s === 'NOT_MARKED' || s === 'UNMARKED' || s === 'PENDING') return 'Not Marked';
         return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
     }
 
@@ -1251,7 +1099,7 @@
     function resetAllProjections() {
         savedPlans = {};
         savedODs = {};
-        syncToDB();
+        saveStateLocal();
         
         if (apiData && apiData.courses) {
             apiData.courses.forEach((c, idx) => {
@@ -1336,7 +1184,6 @@
         triggerFlash('overallCounts');
 
         const stats = calcAttendanceMath(displayPresent, displayTotal);
-
         const circ = 289; 
         const offset = circ - (parseFloat(displayPct) / 100) * circ;
         const svgCircle = document.getElementById('circleProgress');
@@ -1463,29 +1310,6 @@
         const dotEl = document.getElementById(`course-alert-${idx}`);
         if (dotEl) {
             stats.safe ? dotEl.classList.add('hidden') : dotEl.classList.remove('hidden');
-        }
-
-        const tgtEl = document.getElementById(`course-target-${idx}`);
-        if (tgtEl) {
-            let targetText = '';
-            if (stats.margin > 0 && course.scheduled && course.scheduled.length) {
-                const now = new Date();
-                const futureSlots = course.scheduled
-                    .filter(s => { const t = parseSafeDate(s.start); return t && t > now; })
-                    .sort((a, b) => parseSafeDate(a.start) - parseSafeDate(b.start));
-                
-                if (futureSlots.length) {
-                    const targetSlot = futureSlots[Math.min(stats.margin - 1, futureSlots.length - 1)];
-                    const td = parseSafeDate(targetSlot.start);
-                    if (td) targetText = `Safe until ${td.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, ${formatTimeString(targetSlot.start)}`;
-                }
-            }
-            if (targetText) {
-                tgtEl.innerText = targetText;
-                tgtEl.classList.remove('hidden');
-            } else {
-                tgtEl.classList.add('hidden');
-            }
         }
 
         const barEl = document.getElementById(`course-bar-${idx}`);
@@ -1767,7 +1591,9 @@
 
             let slotsSnippet = '';
             daySlots.slice(0, 2).forEach(slot => {
-                slotsSnippet += `<div class="${getSubjClr(slot.courseName)} rounded-md px-1.5 py-0.5 text-[9px] font-mono truncate mb-0.5 hover:brightness-125">${slot.courseName}</div>`;
+                if (slot.type !== 'Off') {
+                    slotsSnippet += `<div class="${getSubjClr(slot.courseName)} rounded-md px-1.5 py-0.5 text-[9px] font-mono truncate mb-0.5 hover:brightness-125">${slot.courseName}</div>`;
+                }
             });
             if (daySlots.length > 2) {
                 slotsSnippet += `<span class="text-[8px] font-mono text-neutral-500">+${daySlots.length - 2} more</span>`;
@@ -1834,7 +1660,7 @@
             }
 
             daySlots.forEach(slot => {
-                if (!slot.startObj || !slot.endObj) return;
+                if (!slot.startObj || !slot.endObj || slot.type === 'Off') return;
                 const startH = slot.startObj.getHours() + slot.startObj.getMinutes() / 60;
                 const endH = slot.endObj.getHours() + slot.endObj.getMinutes() / 60;
                 
@@ -1938,7 +1764,7 @@
         const slots = scheduleMap[dayName] || [];
         let html = '';
 
-        if (slots.length === 0) {
+        if (slots.length === 0 || slots[0].type === 'Off') {
             html = `<p class="text-xs text-neutral-500 text-center py-6 font-mono">No classes scheduled.</p>`;
         } else {
             slots.forEach(slot => {
@@ -2020,13 +1846,13 @@
         if (type === 'status') {
             if (filterStatus === val) filterStatus = 'ALL';
             else filterStatus = val;
-            const btn = filterStatus === 'PRESENT' ? document.getElementById('statusFilterPresent') : filterStatus === 'ABSENT' ? document.getElementById('statusFilterAbsent') : filterStatus === 'NOT_MARKED' ? document.getElementById('statusFilterNotMarked') : null;
+            const btn = filterStatus === 'PRESENT' ? document.getElementById('statusFilterPresent') : filterStatus === 'ABSENT' ? document.getElementById('statusFilterAbsent') : null;
             if (btn) {
                 updateSliderPosition(btn, 'filterStatusSlider');
             } else {
                 document.getElementById('filterStatusSlider').style.width = '0px';
             }
-            ['statusFilterPresent', 'statusFilterAbsent', 'statusFilterNotMarked'].forEach(id => {
+            ['statusFilterPresent', 'statusFilterAbsent'].forEach(id => {
                 const b = document.getElementById(id);
                 if (b) {
                     b.className = b === btn ? 'relative z-10 px-4 py-1.5 rounded-full text-[10px] font-medium text-black transition-colors duration-300 click-pop' : 'relative z-10 px-4 py-1.5 rounded-full text-[10px] text-neutral-400 hover:text-white transition-colors duration-300 click-pop';
@@ -2042,7 +1868,7 @@
         if (savedODs[cName][idx]) delete savedODs[cName][idx];
         else savedODs[cName][idx] = true;
         
-        syncToDB();
+        saveStateLocal();
         triggerFlash('odSimStats');
         renderModalHistory();
         updateOverallCard();
@@ -2052,7 +1878,7 @@
     function resetModalODs() {
         const cName = apiData.courses[activeCourseIndex].name;
         savedODs[cName] = {};
-        syncToDB();
+        saveStateLocal();
         renderModalHistory();
         updateOverallCard();
         updateSingleCourseCard(activeCourseIndex);
@@ -2098,17 +1924,7 @@
         history.forEach((log, idx) => {
             const dateStr = (log.start || '').split(' ')[0];
             const passComp = (filterComp === 'ALL' || log.comp.toLowerCase() === filterComp.toLowerCase());
-            
-            const rawStatus = (log.status || '').toUpperCase();
-            let isLogUnmarked = (rawStatus === 'NOT_MARKED' || rawStatus === 'UNMARKED' || rawStatus === 'PENDING');
-            let isLogPresent = (rawStatus === 'PRESENT' || rawStatus === 'P');
-            let isLogAbsent = (rawStatus === 'ABSENT' || rawStatus === 'A');
-
-            let passStatus = false;
-            if (filterStatus === 'ALL') passStatus = true;
-            else if (filterStatus === 'PRESENT') passStatus = isLogPresent;
-            else if (filterStatus === 'ABSENT') passStatus = isLogAbsent;
-            else if (filterStatus === 'NOT_MARKED') passStatus = isLogUnmarked;
+            const passStatus = (filterStatus === 'ALL' || log.status.toUpperCase() === filterStatus);
             
             if (!passComp || !passStatus) return;
             countShown++;
@@ -2121,18 +1937,11 @@
             const isOD = !!ods[idx];
             let statusText = formatStatus(log.status);
             
-            let dotClass = 'bg-transparent border border-rose-500/50';
-            let badgeClass = 'text-rose-400 bg-rose-500/10';
+            let dotClass = log.status === 'PRESENT' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'bg-transparent border border-rose-500/50';
+            let badgeClass = log.status === 'PRESENT' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
             let actionBtn = '';
 
-            if (isLogPresent) {
-                dotClass = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]';
-                badgeClass = 'text-emerald-400 bg-emerald-500/10';
-            } else if (isLogUnmarked) {
-                dotClass = 'bg-neutral-500 border border-neutral-600';
-                badgeClass = 'text-neutral-400 bg-neutral-500/10 border border-white/5';
-                statusText = 'Not Marked';
-            } else {
+            if (log.status !== 'PRESENT') {
                 if (isOD) {
                     statusText = 'Claimed OD';
                     dotClass = 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.3)]';
@@ -2172,7 +1981,7 @@
         if (savedPlans[cName][idx] === decision) delete savedPlans[cName][idx];
         else savedPlans[cName][idx] = decision;
 
-        syncToDB();
+        saveStateLocal();
         triggerFlash('projStats');
         renderModalUpcoming();
         updateOverallCard();
@@ -2182,7 +1991,7 @@
     function resetModalUpcoming() {
         const cName = apiData.courses[activeCourseIndex].name;
         savedPlans[cName] = {};
-        syncToDB();
+        saveStateLocal();
         renderModalUpcoming();
         updateOverallCard();
         updateSingleCourseCard(activeCourseIndex);
@@ -2249,7 +2058,7 @@
     }
 
     function buildScheduleMap() {
-        scheduleMap = { 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [] };
+        scheduleMap = { 'Monday': [], 'Tuesday': [], 'Wednesday': [], 'Thursday': [], 'Friday': [], 'Saturday': [], 'Sunday': [] };
         if (!apiData || !apiData.timetable) return;
 
         const daysArr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -2296,11 +2105,11 @@
             tabsEl.appendChild(slider);
         }
 
-        const dList = ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const todayName = fullDays[new Date().getDay()];
 
-        if (!activeDay) activeDay = dList.includes(todayName) ? todayName : 'Tuesday';
+        if (!activeDay) activeDay = dList.includes(todayName) ? todayName : 'Monday';
 
         Array.from(tabsEl.children).forEach(child => {
             if (child !== slider) child.remove();
@@ -2346,8 +2155,8 @@
         const isToday = (day === todayName);
         const now = new Date();
 
-        if (slots.length === 0) {
-            listEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">No structure detected.</div>`;
+        if (slots.length === 0 || slots[0].type === 'Off') {
+            listEl.innerHTML = `<div class="glass p-8 text-center text-xs text-neutral-500 font-mono">Holiday / No Classes Scheduled.</div>`;
             return;
         }
 
@@ -2410,21 +2219,8 @@
                 htmlBuilder += `<div class="pt-6 pb-2"><span class="txt-micro text-neutral-500">${formatDateString(log.start)}</span></div>`;
             }
 
-            const raw = (log.status || '').toUpperCase();
-            let isLogUnmarked = (raw === 'NOT_MARKED' || raw === 'UNMARKED' || raw === 'PENDING');
-            let isLogPresent = (raw === 'PRESENT' || raw === 'P');
-
-            let dotCls = 'bg-transparent border border-rose-500/50';
-            let bdgCls = 'text-rose-400 bg-rose-500/10';
-
-            if (isLogPresent) {
-                dotCls = 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]';
-                bdgCls = 'text-emerald-400 bg-emerald-500/10';
-            } else if (isLogUnmarked) {
-                dotCls = 'bg-neutral-500 border border-neutral-600';
-                bdgCls = 'text-neutral-400 bg-neutral-500/10 border border-white/5';
-            }
-            
+            const dotCls = log.status === 'PRESENT' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'bg-transparent border border-rose-500/50';
+            const bdgCls = log.status === 'PRESENT' ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
             const statusFull = formatStatus(log.status);
 
             htmlBuilder += `
@@ -2459,6 +2255,7 @@
 
         let live = null;
         for (const slot of apiData.timetable) {
+            if (slot.type === 'Off') continue;
             const st = parseSafeDate(slot.start);
             const et = parseSafeDate(slot.end);
             if (st && et && now >= st && now <= et) {
@@ -2469,6 +2266,7 @@
 
         let next = null;
         const todaySlots = apiData.timetable
+            .filter(s => s.type !== 'Off')
             .map(s => ({ ...s, sTime: parseSafeDate(s.start), eTime: parseSafeDate(s.end) }))
             .filter(s => s.sTime && s.eTime && toLocalDateStr(s.sTime) === dateStr)
             .sort((a, b) => a.sTime - b.sTime);
@@ -2482,6 +2280,7 @@
 
         if (!next) {
             const future = apiData.timetable
+                .filter(s => s.type !== 'Off')
                 .map(s => ({ ...s, sTime: parseSafeDate(s.start), eTime: parseSafeDate(s.end) }))
                 .filter(s => s.sTime && s.eTime && s.sTime > now)
                 .sort((a, b) => a.sTime - b.sTime);
@@ -2521,12 +2320,5 @@
         }
     }
   </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    });
-  }
-</script>
 </body>
 </html>

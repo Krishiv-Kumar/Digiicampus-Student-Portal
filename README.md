@@ -1,51 +1,54 @@
-# Student Portal 🎓
+# Student Portal Architecture Demo 🎓
 
-**Student Portal** is a high-performance, mobile-responsive, dark-themed web dashboard designed as an advanced wrapper for the Rajalakshmi Engineering College Digiicampus portal. It replaces traditional academic interfaces with a streamlined UI/UX tailored for real-time tracking, predictive analytics, and enhanced academic management.
+**Disclaimer:** This project is a standalone technical demonstration of a Progressive Web App (PWA) and decoupled backend architecture. It utilizes a fully mocked local dataset and does not integrate with, scrape, or connect to any live institutional systems.
+
+**Student Portal Architecture Demo** is a high-performance, mobile-responsive, dark-themed web dashboard designed to showcase modern full-stack development practices. It features a streamlined UI/UX tailored for data visualization, predictive analytics, and academic management simulation based on a B.Tech Artificial Intelligence and Data Science curriculum.
 
 ## 🚀 Live Demo
 **[View the Live Application Here]** *(Add your GitHub Pages URL here once generated)*
 
-*Note for Recruiters: Click the **"Try Demo"** button on the login screen to explore the fully functional dashboard using a simulated 6th-semester B.Tech dataset, bypassing the need for institutional credentials.*
+*Note for Recruiters: Use the provided mock credentials on the login screen to explore the fully functional dashboard using a simulated dataset.*
 
 ---
 
 ## ✨ Key Features
 
-### 1. Real-Time Attendance & Projection Engine
-* **Live Tracking:** Securely fetches and visualizes the student's actual current attendance percentages, total classes conducted, and absentee records across all enrolled courses.
-* **Dynamic Simulation:** Toggle hypothetical "Bunk" or "Attend" statuses for upcoming classes to view real-time changes to the projected attendance percentage.
-* **Leave Management:** Input On-Duty (OD) leaves to instantly recalculate margins, helping students safely maintain mandatory attendance thresholds.
+### 1. Stateful Attendance & Projection Engine
+* **Data Visualization:** Processes and securely visualizes complex attendance datasets via REST API endpoints, rendering overall percentages and course-by-course breakdowns.
+* **Dynamic Simulation:** Features a client-side predictive engine allowing users to toggle hypothetical "Bunk" or "Attend" statuses to calculate real-time impacts on projected attendance.
+* **Leave Management Analytics:** Includes logic to input On-Duty (OD) leaves, dynamically recalculating margins to maintain required attendance thresholds.
 
 ### 2. Grade Simulation & CGPA Tracking
-* **Institutional Sync:** Pulls verified academic history and SGPA data directly from the university's database.
-* **Predictive Grade Selector:** A built-in calculator that allows users to input expected grades for current courses to forecast future SGPA and cumulative CGPA outcomes.
+* **Mock Academic Records:** Renders historical SGPA and course data structures delivered from the FastAPI mock backend across all semesters in ascending order.
+* **Predictive Grade Selector:** A built-in calculator utilizing custom JavaScript algorithms to forecast future SGPA and cumulative CGPA outcomes based on user-selected expected grades.
 
 ### 3. Interactive Vertical Timetable
-* **Precision Grid:** Features a professional, 80px-per-hour vertical calendar schedule starting at 7:30 AM.
-* **Real-Time Tracking:** A dynamic tracking line indicates the current time, actively highlighting ongoing classes and providing countdowns to the next session.
+* **Precision Grid:** Features a professional, 80px-per-hour vertical calendar schedule spanning a full seven-day week, correctly rendering both active classes and weekend/holiday states.
+* **Time Tracking Logic:** A dynamic tracking line indicates the current time, actively highlighting ongoing classes and providing automated countdowns to the next session based on the device's local clock.
 
 ---
 
 ## 🛠 Tech Stack & Architecture
 
-### Frontend
-* **HTML5 & Vanilla JavaScript:** Lightweight, zero-build-step architecture for maximum speed and easy deployment.
-* **Tailwind CSS (CDN):** Utility-first styling utilized for a modern, responsive, and consistent dark-mode UI.
-* **State Management:** Utilizes browser `localStorage` for fast, persistent data retrieval across sessions without unnecessary database queries.
+### Frontend (Progressive Web App)
+* **HTML5 & Vanilla JavaScript:** Lightweight, zero-build-step architecture optimized for maximum rendering speed and DOM manipulation.
+* **Tailwind CSS:** Utility-first styling utilized for a modern, responsive, and consistent dark-mode UI, incorporating mobile safe-area adaptations for native-app feel.
+* **State Management:** Utilizes browser `localStorage` and PWA service workers for fast, persistent data retrieval and cross-session state handling.
 
-### Backend
-* **Python FastAPI:** A high-performance, asynchronous REST framework serving as a secure proxy between the client and the university's official servers.
-* **Requests & Pydantic:** Handles secure API requests, payload validation, and data parsing.
-* **SQLite:** Lightweight local database management for session handling and state persistence.
-* **Authentication Architecture:** Implements a token-based security model that extracts active session cookies to bypass legacy CAPTCHA bottlenecks safely and efficiently.
+### Backend (REST API)
+* **Python FastAPI:** A high-performance, asynchronous REST framework serving the mock data layer and simulated authentication endpoints.
+* **Pydantic:** Enforces strict type hinting and data validation for all API responses and login payloads.
+* **CORS & Middleware:** Configured to cleanly handle cross-origin resource sharing between the static frontend host and the backend deployment environment.
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-├── .gitignore              # Hides local databases and Python cache
-├── demo_data.js            # Fictional 6th-semester dataset for Recruiter Demo Mode
-├── index.html              # Main application entry point and UI
-├── requirements.txt        # Python backend dependencies
-└── server.py               # FastAPI proxy server and routing
+├── .gitignore              # Hides Python cache and local environment files
+├── index.html              # Main application entry point, login form, and UI
+├── manifest.json           # PWA manifest for native app installation
+├── README.md               # Project documentation
+├── requirements.txt        # Python backend dependencies (FastAPI, Uvicorn, Pydantic)
+├── main.py                 # FastAPI backend serving mock JSON endpoints and auth logic
+└── sw.js                   # PWA service worker for asset caching

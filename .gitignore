@@ -1,17 +1,5 @@
-# Ignore VS Code workspace settings
-.vscode/
-
-# Ignore Python auto-generated cache
 __pycache__/
-*.pyc
-
-# Ignore local SQLite databases (prevents leaking/overwriting data)
-*.db
 .campus_portal.db
-.cp.db
-
-# Ignore local testing and scraping scripts
-get_attendance.py
-get_classes.py
-inspect_attendance.py
-inspect_lessons.py
+.env
+*.pyc
+.DS_Store
